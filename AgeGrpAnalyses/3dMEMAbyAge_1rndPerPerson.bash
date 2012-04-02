@@ -6,7 +6,7 @@
 # create 3dMEMA run script for each of three conditions
 # run 3dMEMA run script
 
-covarAgeFile="covariateAge.1D"
+covarAgeFile="$(pwd)/covariateAge.1D"
 #make covariateAge file
 #echo "making $covarAgeFile and BRICs";
 #echo 'subj	age' >  $covarAgeFile
@@ -27,7 +27,7 @@ AScorr=2; ASerrorCorr=6; VGScorr=14;
 ###
 # run a for each trial/result
 
-for trial in {ASerrorCorr,VGScorr,AScorr}; do
+for trial in {ASerrorCorr,VGScorr}; do #,AScorr}; do
   
    echo "== $trial =="
 
@@ -41,12 +41,17 @@ for trial in {ASerrorCorr,VGScorr,AScorr}; do
 
 
 
-   prefix=RndAge
+   prefix=$(pwd)/RndAge_$trial
 
    # remove old output before making new output
    [ -r $prefix+tlrc.BRIC ] && rm $prefix+tlrc.BRIC
 
     cat >$trial.MEMA.sh <<EOF 
+#!/usr/bin/env bash
+    # 3dMEMA creates temp files
+    # cannot have overlapping
+    tempdir=\$(mktemp -d)
+    cd \$tempdir
     3dMEMA \\
       -prefix $prefix \\
       -jobs 4 \\
@@ -63,17 +68,20 @@ for trial in {ASerrorCorr,VGScorr,AScorr}; do
                 ./readAgesForMEMA.pl -n $skipNoErrors| while read lunaid bircid age; do
                          idx=$niiIdx;
                          path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML+tlrc";
-                         echo -en "\t\t$lunaid$bircid ${path}[$idx] ";
+                         echo -en "                  $lunaid$bircid ${path}[$idx] ";
                          let idx++;
                          echo "${path}[$idx] \\";
                   done
 
-              )
+              )  2>&1 |
+tee $(pwd)/$trial.output
 
 EOF
 
 chmod +x $trial.MEMA.sh
-./$trial.MEMA.sh
+
+# put in background attached to very own screen session
+screen -dmS $trial ./$trial.MEMA.sh 
 
 done
 
