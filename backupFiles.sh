@@ -127,7 +127,7 @@ listfile='backupfilesList.txt'
 #    (remove root prefix)  for rsync
 
 # check size
-totalsize=$(awk '{print "/Volumes/Governator/"$0}' $listfile | xargs du -kc | awk '(/total/){sum+=$1}END{print sum/1024**2}' );
+totalsize=$(awk '{print "\"/Volumes/Governator/"$0"\""}' $listfile | xargs du -kc | awk '(/total/){sum+=$1}END{print sum/1024**2}' );
 
 if [ ${totalsize%%.*} -gt 600 ]; then
   echo "Error: ${totalsize}G > 600G, not allowing transfer :(" |
@@ -143,5 +143,6 @@ fi
 rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Serena/Backup/
 
 # update recorded log
+cd $root
 git add $listfile 
 git commit -m "$(date +%F) auto up ($totalsize GB)"
