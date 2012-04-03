@@ -35,14 +35,14 @@ foreach my $row (1 .. $sheet -> {MaxRow}) {
    # for mema want all ages (A|T|C) and only random (idx==15)
    # but left as before (with defulats changed)
 
-               # match only age as regexp (e.g. "A|T" matches adults or Teens, "C" matches only children)
-#   next unless $sheet->{Cells}[$row][8]->{Val} =~ /^$opts{a}$/ &&
-#               # if sought idx is beyond, then treat as "all"  -- [99]==DNE (all)
-#               # otherwise want column [14] == 1 (2nd vist) or [15]==1 (random) 
-#               ( 
-#                 $sheet->{MaxCol} < $opts{i} || 
-#                 $sheet->{Cells}[$row][$opts{i}]->{Val} == 1
-#               );
+   # match only age as regexp (e.g. "A|T" matches adults or Teens, "C" matches only children)
+   # if sought idx is beyond, then treat as "all"  -- [99]==DNE (all)
+   # otherwise want column [14] == 1 (2nd vist) or [15]==1 (random) 
+   next unless $sheet->{Cells}[$row][8]->{Val} =~ /^$opts{a}$/ &&
+               ( 
+                 $sheet->{MaxCol} < $opts{i} || 
+                 ( $sheet->{Cells}[$row][$opts{i}] && $sheet->{Cells}[$row][$opts{i}]->{Val} == 1 )
+               );
 
    # skip if excluded (no errors)
    next if $opts{n} == 1 and $sheet->{Cells}[$row][12]->{Val} and $sheet->{Cells}[$row][12]->{Val} == 1;

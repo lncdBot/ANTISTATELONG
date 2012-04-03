@@ -6,19 +6,6 @@
 # create 3dMEMA run script for each of three conditions
 # run 3dMEMA run script
 
-covarAgeFile="$(pwd)/covariateAge.1D"
-#make covariateAge file
-#echo "making $covarAgeFile and BRICs";
-#echo 'subj	age' >  $covarAgeFile
-#./readAgesForMEMA.pl | while read lunaid bircid age; do
-#   path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML";
-#   if [ ! -r "${path}+tlrc.BRIK" ]; then
-#      echo 3dcopy "${path}.nii.gz" "${path}+tlrc.BRIC"
-#   fi
-#
-#   echo "$lunaid$bircid	$age" >> $covarAgeFile
-#
-#done
 
 
 # define index in REML nii for trial result types
@@ -27,7 +14,7 @@ AScorr=2; ASerrorCorr=6; VGScorr=14;
 ###
 # run a for each trial/result
 
-for trial in {ASerrorCorr,VGScorr}; do #,AScorr}; do
+for trial in {AScorr,ASerrorCorr,VGScorr}; do
   
    echo "== $trial =="
 
@@ -39,14 +26,33 @@ for trial in {ASerrorCorr,VGScorr}; do #,AScorr}; do
    else                                   skipNoErrors=0; fi
 
 
+   #make covariateAge file
+   covarAgeFile="$(pwd)/3dMEMA/covariateAge_$trial.1D"
+         prefix="$(pwd)/3dMEMA/RndAge_$trial"
+     scriptName="$(pwd)/3dMEMA/$trial.bash"
+
+   if [ ! -r $covarAgeFile ]; then
+      echo "making $covarAgeFile and BRICs";
+      echo 'subj	age' >  $covarAgeFile
+      ./readAgesForMEMA.pl -n $skipNoErrors | while read lunaid bircid age; do
+         path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML";
+
+         # while we're here, make sure the needed BRIK files exist
+         if [ ! -r "${path}+tlrc.BRIK" ]; then
+            echo 3dcopy "${path}.nii.gz" "${path}+tlrc"
+         fi
+         echo "$lunaid$bircid	$age" >> $covarAgeFile
+      done
+   fi
 
 
-   prefix=$(pwd)/RndAge_$trial
 
    # remove old output before making new output
    [ -r $prefix+tlrc.BRIC ] && rm $prefix+tlrc.BRIC
 
-    cat >$trial.MEMA.sh <<EOF 
+
+    # make script
+    cat >$scriptName <<EOF 
 #!/usr/bin/env bash
     # 3dMEMA creates temp files
     # cannot have overlapping
@@ -61,59 +67,29 @@ for trial in {ASerrorCorr,VGScorr}; do #,AScorr}; do
       -n_nonzero 2 \\
       -mask /Volumes/Governator/ANTISTATELONG/Reliability/mask+tlrc \\
       -set everyone \\
-             $( 
-                # lunaid subjid pathtoBrain[idx] pathtobrain[idx+1]
-                # for random from 129 subjects
+      $( 
+          # lunaid subjid pathtoBrain[idx] pathtobrain[idx+1]
+          # for random from 129 subjects
 
-                ./readAgesForMEMA.pl -n $skipNoErrors| while read lunaid bircid age; do
-                         idx=$niiIdx;
-                         path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML+tlrc";
-                         echo -en "                  $lunaid$bircid ${path}[$idx] ";
-                         let idx++;
-                         echo "${path}[$idx] \\";
-                  done
+          ./readAgesForMEMA.pl -n $skipNoErrors| while read lunaid bircid age; do
+                   idx=$niiIdx;
+                   path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML+tlrc";
+                   echo -en "                  $lunaid$bircid ${path}[$idx] ";
+                   let idx++;
+                   echo "${path}[$idx] \\";
+            done
 
-              )  2>&1 |
-tee $(pwd)/$trial.output
+        )  2>&1 |
+tee $(pwd)/3dMEMA/out_$trial.log
 
 EOF
 
-chmod +x $trial.MEMA.sh
+chmod +x $scriptName
 
 # put in background attached to very own screen session
-screen -dmS $trial ./$trial.MEMA.sh 
+set -x
+screen -dmS $trial $scriptName
+set +x
 
 done
 
-###  FINISHED ALL MEMA's
-
-# remove BRIK
-#./readAgesForMEMA.pl | while read lunaid bircid age; do
-#  path="/Volumes/Governator/ANTISTATELONG/$lunaid/$bircid/analysis/glm_hrf_Stats_REML";
-#  if [ -r "${path}+tlrc.BRIC" ]; then
-#     rm "${path}+tlrc.BRIC"
-#  fi
-#done
-
-####3dcopy /Volumes/Governator/ANTISTATELONG/10170/060603094618/analysis/glm_hrf_Stats_REML.nii.gz /Volumes/Governator/ANTISTATELONG/10170/060603094618/analysis/glm_hrf_Stats_REML+tlrc.BRIK
-###3dcopy /Volumes/Governator/ANTISTATELONG/10174/060518155035/analysis/glm_hrf_Stats_REML.nii.gz /Volumes/Governator/ANTISTATELONG/10174/060518155035/analysis/glm_hrf_Stats_REML+tlrc.BRIK
-###3dcopy /Volumes/Governator/ANTISTATELONG/10176/061106165928/analysis/glm_hrf_Stats_REML.nii.gz /Volumes/Governator/ANTISTATELONG/10176/061106165928/analysis/glm_hrf_Stats_REML+tlrc.BRIK
-###
-###rm exampleAge+orig.HEAD
-###rm exampleAge+orig.BRIK
-###
-###
-####!/bin/bash
-###
-####Author:	Will Foran (wrote for SO)
-####Date:		March 13, 2012
-####File: 		runAgeGrpComparisonFINAL.bash 
-####Dir:		/Volumes/Governator/ANTISTATELONG/AgeGrpAnalyses
-###
-####Purpose:	A finalized version of runAgeGrpComparison.bash
-####			Each ttest++ tests whether grp mean beta is sig > 0
-####Notes:		Requires input from SubjectList.xlsx
-####			Requires subtraction files to have been created in GLM/subtactBetas.bash
-###
-####./runAgeGrpComparisonFINAL.bash 2>> <date>_runAgeGrpComparisonFINALStdErr.txt | tee -a <date>_runAgeGrpComparisonFINALStdOut.txt
-###
