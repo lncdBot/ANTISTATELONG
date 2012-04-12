@@ -1,6 +1,9 @@
-#Author: Sarah Ordaz
-#Date: 2012_01_30
-#	  2012_03_19
+#!/usr/bin/env bash
+
+#Author: SO, WF
+#Date: 2012-01-30
+#      2012-03-19
+#      2012-04-12
 #
 #File: FilesToBackup.txt
 #Dir: /Volumes/Governator/ANTISTATELONG
@@ -120,8 +123,7 @@ listfile='backupfilesList.txt'
 
 
 
-) |
-   sed  -e '/dcm$/d;/~$/d; s:/Volumes/Governator/::' >  $listfile
+) | sed  -e '/dcm$/d;/~$/d; s:/Volumes/Governator/::' >  $listfile
 
 #  ^ removed any dcm or emacs files still hanging on and format
 #    (remove root prefix)  for rsync
@@ -130,8 +132,8 @@ listfile='backupfilesList.txt'
 totalsize=$(awk '{print "\"/Volumes/Governator/"$0"\""}' $listfile | xargs du -kc | awk '(/total/){sum+=$1}END{print sum/1024**2}' );
 
 if [ ${totalsize%%.*} -gt 600 ]; then
-  echo "Error: ${totalsize}G > 600G, not allowing transfer :(" |
-    tee >(cat 1>&2) | 
+  echo "Error: ${totalsize}G > 600G, not allowing transfer :(" | 
+    tee >(cat 1>&2 ) |  
     mail -s "ANTISTATELONG Backup too large" willforan@gmail.com ordazs@upmc.edu
   exit
 else
@@ -139,10 +141,11 @@ else
 fi
 
 
-# transfer!
-rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Serena/Backup/
-
 # update recorded log
 cd $root
 git add $listfile 
 git commit -m "$(date +%F) auto up ($totalsize GB)"
+
+# transfer!
+rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Serena/Backup/
+

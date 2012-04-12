@@ -23,12 +23,15 @@ my %opts;
 $opts{n}     = 0;         #skip no error: 0 use, 1 skip if no errors
 $opts{a}     = "C|T|A";   #age:           C|T|A -- all, C -- children, T -- teen, A -- adult
 $opts{i}     = 14;        #index:         13 -- one pp, 14 -- random, >15 -- all
+$opts{f}     = 'age';     #formula
 
-getopts('n:a:i:', \%opts); 
+getopts('n:a:i:f:', \%opts); 
 
 
 my $excel     = Spreadsheet::XLSX -> new ('SubjectList.xlsx');
 my $sheet  = $excel -> {Worksheet} ->[0];
+
+my @formulas = split /\s/, $opts{f};
 
 foreach my $row (1 .. $sheet -> {MaxRow}) {
 
@@ -47,8 +50,17 @@ foreach my $row (1 .. $sheet -> {MaxRow}) {
    # skip if excluded (no errors)
    next if $opts{n} == 1 and $sheet->{Cells}[$row][12]->{Val} and $sheet->{Cells}[$row][12]->{Val} == 1;
 
+   # compute age equations (for regressor)
+   my @age = ();
+   my $age = $sheet->{Cells}[$row][7]->{Val};
+   for (@formulas) {
+    # using "for my $f" changes values in formula! why!?
+    my $f=$_;
+    $f=~s/age/$age/g;
+    push @age, eval $f;
+   }
 
-   print join("\t",map {$_->{Val}} @{$sheet->{Cells}[$row]}[1,3,7]),"\n";
+   print join(" ",(map {$_->{Val}} @{$sheet->{Cells}[$row]}[1,3]),@age),"\n";
 
 }
 
