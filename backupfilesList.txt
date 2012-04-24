@@ -16110,12 +16110,15 @@ ANTISTATELONG/filesToBackup.txt
 ANTISTATELONG/findNumberFiles
 ANTISTATELONG/For_CheckPreprocessing.txt
 ANTISTATELONG/For_CheckStructuralsFunctional.txt
+ANTISTATELONG/GLM/.mkSim4ErrorTrials.pl.swp
 ANTISTATELONG/GLM/2012-03-13-NOTES-missing.txt
 ANTISTATELONG/GLM/2012_03_08_NOTES_glmsWithWarnings.txt
 ANTISTATELONG/GLM/3dDeconvolve.err
 ANTISTATELONG/GLM/glm_hrf.bash
 ANTISTATELONG/GLM/glm_hrf.bash.png
+ANTISTATELONG/GLM/glm_hrf_4ErrorTrials.bash
 ANTISTATELONG/GLM/glmPullWarnings.bash
+ANTISTATELONG/GLM/mkSim4ErrorTrials.pl
 ANTISTATELONG/GLM/setUpGLM.bash
 ANTISTATELONG/GLM/SetUpGLM.png
 ANTISTATELONG/GLM/SingleSubjectData_ApprovedByKV.png
