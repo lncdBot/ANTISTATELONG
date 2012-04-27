@@ -42,33 +42,33 @@ Demographics<-read.table("listage.txt")
 names(Demographics)<-c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 
 #... Calculate other sex codes
-Demographics$sex55 <- NA_integer_     #Add column for M = -0.5  F = 0.5
-Demographics$sexMref <- NA_integer_   #Add column for M = 0     F = 1
-Demographics$sex55 <- Demographics$sex -0.5
+Demographics$sex55   <- NA_integer_              # Add column for M = -0.5  F = 0.5
+Demographics$sexMref <- NA_integer_              # Add column for M = 0     F = 1
+Demographics$sex55   <- Demographics$sex -0.5
 Demographics$sexMref <- abs(Demographics$sex - 1)
-head(Demographics)
 
 #... Calculate other age variables
 Demographics$invage <- NA_integer_
 Demographics$invageC <- NA_integer_
 Demographics$ageC <- NA_integer_
 Demographics$ageCsq <- NA_integer_
-head(Demographics)
-#calculate ageC, ageCsq, invageC
-meanAge <- mean(Demographics$age)   #For 312, this is 16.7254959035428
-meanAge
-Demographics$ageC <- Demographics$age - mean(Demographics$age)
-Demographics$ageCsq <- Demographics$ageC * Demographics$ageC
-head(Demographics)
-Demographics$invage <- 1/ Demographics$age
-invMeanAge <- 1/meanAge             #For 312, this is 0.05978896
-invMeanAge
-Demographics$invageC <- Demographics$invage - invMeanAge
-head(Demographics)
 
+#... Calculate ageC, ageCsq, invageC
+meanAge      <- mean(Demographics$age)   #For 312, this is 16.7254959035428
+invMeanAge   <- 1/meanAge             #For 312, this is 0.05978896
+
+Demographics$ageC    <- Demographics$age - mean(Demographics$age)
+Demographics$ageCsq  <- Demographics$ageC * Demographics$ageC
+Demographics$invage  <- 1/Demographics$age
+Demographics$invageC <- Demographics$invage - invMeanAge
+
+# set ID
 Demographics$ID <- NA_integer_
-ID <- seq(1,312)
-Demographics$ID <- ID
+Demographics$ID <- seq(1,312)
+
+
+meanAge
+invMeanAge
 head(Demographics)
 
 
@@ -97,17 +97,26 @@ Mask$dim                 #Confirm output values
 
 
 #... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
-Indexnumber <- which(Mask[,,]>0)   #Find all voxels>0  # I didn't use this because it flattened the data in a manner that made it less interpretable
+Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
+                                                      #   I didn't use this because it flattened the data 
+                                                      #   in a manner that made it less interpretable
+Indexijk       <- which(Mask[,,] > 0, arr.ind=TRUE)   # This creates more interpretable index
+IndicesMatrix  <- cbind(Indexnumber, Indexijk)        # Matrix with both types of index information
+Indices        <- as.data.frame(IndicesMatrix)
+names(Indices) <- c("Indexnumber","i", "j", "k")      # make a data frame and label what column is what
+
+# print some checks
 length(Indexnumber)                #Number of voxels that I will be using (67,976)
-Indexijk <- which(Mask[,,] > 0, arr.ind=TRUE)   #This creates more interpretable index
 length(Indexijk[,1])               #Number of rows (for column 1) = Number of voxels in mask (should = length(indexnumber))
-IndicesMatrix<-cbind(Indexnumber, Indexijk)  #Matrix with both types of index information
-Indices <- as.data.frame(IndicesMatrix)
-names(Indices)<-c("Indexnumber","i", "j", "k")
 head(Indices)
 
 #^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
-Indices <- data.frame(Indexnumber=rep(NA_real_,3), i=rep(NA_real_,3), j=rep(NA_real_,3), k=rep(NA_real_,3))
+# pre-allocate
+Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
+                       i=rep(NA_real_,3), 
+                       j=rep(NA_real_,3), 
+                       k=rep(NA_real_,3))
+
 Indices$Indexnumber <- seq(300,302)
 Indices$i <- sample(30:35,3)
 Indices$j <- sample(29:32,3)
@@ -122,70 +131,89 @@ NumVisits
 ########### Compile variables summarizing numbers ################
 
 NumVoxels <-length(Indexijk[,1])                          #This will be 67,976
-NumVoxels
 NumVisits <- DataBeta$dim[4]                              #This will be 312
+
+# print out check
+NumVoxels
 NumVisits
 #NumVisitVoxels<-(length(Indexijk[,1]))*DataBeta$dim[4]    #This will be 21,208,512 (= 67,976 * 312)
 
 
-################ Generate data frame ("Data") that's 312 rows long ############################
+################ Generate data frame ("DemogMRI") that's 312 rows long ############################
 
-#...Set up "Data" matrix = Demographics matrix + columns for MRI data (312 rows long) 
-Data <- Demographics
-Data$Indexnumber <- NA_real_
-Data$Beta <- NA_real_
-Data$Tstat <- NA_real_
-head(Data)
+#...Set up "DemogMRI" matrix = Demographics matrix + columns for MRI data (312 rows long) 
+DemogMRI             <- Demographics
+DemogMRI$Indexnumber <- NA_real_
+DemogMRI$Beta        <- NA_real_
+DemogMRI$Tstat       <- NA_real_
+head(DemogMRI)
 
 
 ################ For each voxel (67,000+), generate a file AND run HLM ############################
 
 #... Create data frame for holding HLM output.  One row per voxel
-LmerOutputPerVoxel<-data.frame(Indexnumber=rep(NA_real_,NumVoxels),i=rep(NA_real_,NumVoxels),j=rep(NA_real_,NumVoxels),k=rep(NA_real_,NumVoxels),AIC=rep(NA_real_,NumVoxels),Deviance=rep(NA_real_,NumVoxels),BInt=rep(NA_real_,NumVoxels),BSlope=rep(NA_real_,NumVoxels),BIntSE=rep(NA_real_,NumVoxels),BSlopeSE=rep(NA_real_,NumVoxels),BIntT=rep(NA_real_,NumVoxels),BSlopeT=rep(NA_real_,NumVoxels),varSigma=rep(NA_real_,NumVoxels),varTau00=rep(NA_real_,NumVoxels), varTau11=rep(NA_real_,NumVoxels))
+LmerOutputPerVoxel  <- data.frame( Indexnumber=rep(NA_real_,NumVoxels),
+                                    i=rep(NA_real_,NumVoxels),
+                                    j=rep(NA_real_,NumVoxels),
+                                    k=rep(NA_real_,NumVoxels),
+                                    AIC=rep(NA_real_,NumVoxels),
+                                    Deviance=rep(NA_real_,NumVoxels),
+                                    BInt=rep(NA_real_,NumVoxels),
+                                    BSlope=rep(NA_real_,NumVoxels),
+                                    BIntSE=rep(NA_real_,NumVoxels),
+                                    BSlopeSE=rep(NA_real_,NumVoxels),
+                                    BIntT=rep(NA_real_,NumVoxels),
+                                    BSlopeT=rep(NA_real_,NumVoxels),
+                                    varSigma=rep(NA_real_,NumVoxels),
+                                    varTau00=rep(NA_real_,NumVoxels), 
+                                    varTau11=rep(NA_real_,NumVoxels))
 head(LmerOutputPerVoxel)
 
 #...For each voxel....(This loop goes through 67,976 times..except 3 times for ^^FAKE DATA^^^)
 for (a in 1:NumVoxels){
   
+  # copy indecies into lmeroutput
   LmerOutputPerVoxel$Indexnumber[a] <- Indices$Indexnumber[a]
   LmerOutputPerVoxel$i[a] <- Indices$i[a]
   LmerOutputPerVoxel$j[a] <- Indices$j[a]
   LmerOutputPerVoxel$k[a] <- Indices$k[a]
   
-  Data$Beta[a] <- Indices$i[a]
+  DemogMRI$Beta[a]        <- Indices$i[a]
   
   #...Pull the data for each of the voxels that are within the mask (This loops 312 times)
   for (e in 1:NumVisits){
-    Data$Beta[e]<-DataBeta[Indices$i[a], Indices$j[a], Indices$k[a], e]   #TO DO: Make sure this works
-    Data$Tstat[e]<-DataTstat[Indices$i[a], Indices$j[a], Indices$k[a], e]
+    DemogMRI$Beta[e]  <- DataBeta[ Indices$i[a], Indices$j[a], Indices$k[a], e]   #TO DO: Make sure this works
+    DemogMRI$Tstat[e] <- DataTstat[Indices$i[a], Indices$j[a], Indices$k[a], e]
   }
     
   #...Run HLM lme4 for each voxel
   ##Random intercept: lmer1a0 <- lmer(y~x+(1|g))
   ##Random slope:     lmer1a1 <- lmer(y~x+(x|g))
   #Random intercept model 
-  #lmer1a0 <- lmer(Beta ~ age + (1 | lunaid), Data$Beta, REML=TRUE)  
+  #lmer1a0 <- lmer(Beta ~ age + (1 | lunaid), DemogMRI$Beta, REML=TRUE)  
   #Random slope model   
-  lmer1a1 <- lmer(Beta ~ age + (age | lunaID), Data, REML=TRUE)
+  lmer1a1 <- lmer(Beta ~ age + (age | lunaID), DemogMRI, REML=TRUE)
     
   LmerOutputPerVoxel[a,6]<-deviance(lmer1a1)  #Gives you REML estimate of deviance
   LmerOutputPerVoxel[a,5]<-AIC(lmer1a1)       #Just use AIC.  BIC additionally accounts for sample size; don't need it
 
   lmer1a1summ <- summary(lmer1a1)
-  lmCoefs <- lmer1a1summ@coefs  #:-)   #str(lmer1a1summ@coefs)  Stored as a matrix
-  LmerOutputPerVoxel[a, "BInt"] <- lmCoefs["(Intercept)","Estimate"]      #Could also retrieve as lmCoefs[1,1]
-  LmerOutputPerVoxel[a, "BSlope"] <- lmCoefs["age","Estimate"]              #Could also retrieve as lmCoefs[2,1]
-  LmerOutputPerVoxel[a, "BIntSE"] <- lmCoefs["(Intercept)","Std. Error"]      #Could also retrieve as lmCoefs[1,2]
-  LmerOutputPerVoxel[a, "BSlopeSE"] <- lmCoefs["age","Std. Error"]              #Could also retrieve as lmCoefs[2,2]
-  LmerOutputPerVoxel[a, "BIntT"] <- lmCoefs["(Intercept)","t value"]      #Could also retrieve as lmCoefs[1,3]
-  LmerOutputPerVoxel[a, "BSlopeT"] <- lmCoefs["age","t value"]              #Could also retrieve as lmCoefs[2,3]
+  lmCoefs     <- lmer1a1summ@coefs  #:-)   #str(lmer1a1summ@coefs)  Stored as a matrix
+  LmerOutputPerVoxel[a, "BInt"]     <- lmCoefs["(Intercept)","Estimate"]     #Could also retrieve as lmCoefs[1,1]
+  LmerOutputPerVoxel[a, "BSlope"]   <- lmCoefs["age","Estimate"]             #Could also retrieve as lmCoefs[2,1]
+  LmerOutputPerVoxel[a, "BIntSE"]   <- lmCoefs["(Intercept)","Std. Error"]   #Could also retrieve as lmCoefs[1,2]
+  LmerOutputPerVoxel[a, "BSlopeSE"] <- lmCoefs["age","Std. Error"]           #Could also retrieve as lmCoefs[2,2]
+  LmerOutputPerVoxel[a, "BIntT"]    <- lmCoefs["(Intercept)","t value"]      #Could also retrieve as lmCoefs[1,3]
+  LmerOutputPerVoxel[a, "BSlopeT"]  <- lmCoefs["age","t value"]              #Could also retrieve as lmCoefs[2,3]
   #list(coefs=lmer1a1summ@coefs, AIC(lmer1a1))
   LmerOutputPerVoxel[a, "varTau00"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["(Intercept)", "(Intercept)"]
   LmerOutputPerVoxel[a, "varTau11"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["age", "age"]
   #Not sure how to get sigma
 
-  Data$Beta <- NA_real_
-  Data$Tstat <- NA_real_
+  DemogMRI$Beta  <- NA_real_
+  DemogMRI$Tstat <- NA_real_
+
+  # clear before next round, just in case
   rm(lmer1a1)
   rm(lmer1a1summ)
 }
@@ -224,10 +252,10 @@ Results <- array(0, c(smap[[1]]$sdim, ncol(voxResults)))
 maskIndices <- smap[[1]]$maskIndices
 icnum <- smap[[1]]$ic
 
+
 #tile maskIndices ncol(voxResults) times and add 4th dim col
 #pracma and repmat are Matlab commands
 #Matlab has the repmat function documented a lot more clearly
-maskIndicesMod <- cbind(pracma::repmat(maskIndices, ncol(voxResults), 1), rep(1:ncol(voxResults), each=nrow(voxResults)))
 
 #It will be slower to loop through and put each ijkl in it's proper spot.  
 #Below we create a list for each stat brik, and then loop thorugh and populate each
@@ -264,7 +292,7 @@ icAFNI <- new("afni", results, BYTEORDER_STRING="LSB_FIRST", TEMPLATE_SPACE="MNI
                 3, 2, 3, numsubjects, 1, 0, #second corr
                 4, 3, 1, numsubjects - 2, #second ttest (df = N - 2)
                 6, 2, 3, numsubjects, 1, 0,
-                7, 3, 1, numsubjects - 2) #third ttest (df = N - 2))
+                7, 3, 1, numsubjects - 2) #third ttest (df = N - 2)
               )
 
 #BRICK_STATAUX NOTES
@@ -297,5 +325,5 @@ voxResults
 
 #Create a composite data set and then save as data frame
 #Datamatrix<-cbind(Indexnumber, Beta, Tstat)    #Leave out x,y,z to minimize data set size
-#Data<-data.frame(Datamatrix)
+#DemogMRI<-data.frame(Datamatrix)
 #as.data.frame(data)   #It could not convert my table so I used above instead
