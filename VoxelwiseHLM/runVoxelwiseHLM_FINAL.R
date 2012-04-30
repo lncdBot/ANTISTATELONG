@@ -29,7 +29,8 @@ library(lme4)
 
 #################Set variables############
 
-setwd("/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/")
+#setwd("/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/")
+#setwd("./")
 
 #OnlySigTValues <- 0    #Change this setting to 1 if you want to only import Betas with significant T values
 
@@ -38,8 +39,8 @@ setwd("/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/")
 #... Read in list of lunaID, bircID, age, 
 #Will created script in /Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 #Output will be in the same order
-Demographics<-read.table("listage.txt")
-names(Demographics)<-c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
+Demographics        <- read.table("listage.txt")
+names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 
 #... Calculate other sex codes
 Demographics$sex55   <- NA_integer_              # Add column for M = -0.5  F = 0.5
@@ -48,10 +49,10 @@ Demographics$sex55   <- Demographics$sex -0.5
 Demographics$sexMref <- abs(Demographics$sex - 1)
 
 #... Calculate other age variables
-Demographics$invage <- NA_integer_
+Demographics$invage  <- NA_integer_
 Demographics$invageC <- NA_integer_
-Demographics$ageC <- NA_integer_
-Demographics$ageCsq <- NA_integer_
+Demographics$ageC    <- NA_integer_
+Demographics$ageCsq  <- NA_integer_
 
 #... Calculate ageC, ageCsq, invageC
 meanAge      <- mean(Demographics$age)   #For 312, this is 16.7254959035428
@@ -92,8 +93,10 @@ DataTstat$dim                                 #Confirm output value
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
 #$$$$$Q: I think these niftis have been converted from RAM --> LPI
 Mask <- nifti.image.read("mask_copy")  #Output will be three values (64x76x64)
-range(Mask[,,])          #Check to make sure that between 0 and 1
-Mask$dim                 #Confirm output values
+
+
+range(Mask[,,])                        #Check to make sure that between 0 and 1
+Mask$dim                               #Confirm output values
 
 
 #... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
@@ -112,20 +115,22 @@ head(Indices)
 
 #^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
 # pre-allocate
-Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
-                       i=rep(NA_real_,3), 
-                       j=rep(NA_real_,3), 
-                       k=rep(NA_real_,3))
+# Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
+#                        i=rep(NA_real_,3), 
+#                        j=rep(NA_real_,3), 
+#                        k=rep(NA_real_,3))
+# 
+# Indices$Indexnumber <- seq(300,302)
+# Indices$i <- sample(30:35,3)
+# Indices$j <- sample(29:32,3)
+# Indices$k <- sample(20:23,3)
+# NumVoxels <- 3
+# NumVisits <- DataBeta$dim[4]                              #This will be 312
+# 
+# # check
+# cbind(NumVoxels, NumVisits)
+# Indices
 
-Indices$Indexnumber <- seq(300,302)
-Indices$i <- sample(30:35,3)
-Indices$j <- sample(29:32,3)
-Indices$k <- sample(20:23,3)
-NumVoxels <- 3
-NumVoxels
-Indices
-NumVisits <- DataBeta$dim[4]                              #This will be 312
-NumVisits
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ########### Compile variables summarizing numbers ################
@@ -134,8 +139,7 @@ NumVoxels <-length(Indexijk[,1])                          #This will be 67,976
 NumVisits <- DataBeta$dim[4]                              #This will be 312
 
 # print out check
-NumVoxels
-NumVisits
+cbind(NumVoxels, NumVisits)
 #NumVisitVoxels<-(length(Indexijk[,1]))*DataBeta$dim[4]    #This will be 21,208,512 (= 67,976 * 312)
 
 
@@ -159,7 +163,7 @@ LmerOutputPerVoxel  <- data.frame( Indexnumber=rep(NA_real_,NumVoxels),
                                     AIC=rep(NA_real_,NumVoxels),
                                     Deviance=rep(NA_real_,NumVoxels),
                                     BInt=rep(NA_real_,NumVoxels),
-                                    BSlope=rep(NA_real_,NumVoxels),
+                                    BSlope=rep(NA_real_,NumVoxels), #this is the important one
                                     BIntSE=rep(NA_real_,NumVoxels),
                                     BSlopeSE=rep(NA_real_,NumVoxels),
                                     BIntT=rep(NA_real_,NumVoxels),
@@ -174,16 +178,19 @@ for (a in 1:NumVoxels){
   
   # copy indecies into lmeroutput
   LmerOutputPerVoxel$Indexnumber[a] <- Indices$Indexnumber[a]
-  LmerOutputPerVoxel$i[a] <- Indices$i[a]
-  LmerOutputPerVoxel$j[a] <- Indices$j[a]
-  LmerOutputPerVoxel$k[a] <- Indices$k[a]
-  
-  DemogMRI$Beta[a]        <- Indices$i[a]
+  LmerOutputPerVoxel$i[a]           <- Indices$i[a]
+  LmerOutputPerVoxel$j[a]           <- Indices$j[a]
+  LmerOutputPerVoxel$k[a]           <- Indices$k[a]
   
   #...Pull the data for each of the voxels that are within the mask (This loops 312 times)
   for (e in 1:NumVisits){
+                           # the value at this voxel (i,j,k) and timepoint (e) 
     DemogMRI$Beta[e]  <- DataBeta[ Indices$i[a], Indices$j[a], Indices$k[a], e]   #TO DO: Make sure this works
     DemogMRI$Tstat[e] <- DataTstat[Indices$i[a], Indices$j[a], Indices$k[a], e]
+    
+    # all voxels belong to the same a of 313
+    #DemogMRI$Indexnumber[e] <- Indices$Indexnumber[a]
+     
   }
     
   #...Run HLM lme4 for each voxel
@@ -222,108 +229,5 @@ for (a in 1:NumVoxels){
 ###############Fork to run on multiple processors##################################              
 #QQQ How to do this?  Where to insert?
 
-
-###############Reconstruct sparse storage as full cube###########################
-
-# Switch to oro.nifti
-library(oro.nifti)
-library(pracma)
-
-Results <- array(0, c(LmerOutputPerVoxel$AIC, ncol(voxResults)))
-
-#SO: Populate a 4D empty matrix then fill it in 
-#NOTE: Each stat is 3D, but multiple stats --> 4D
-
-#NumVoxels <- LmerOutputPerVoxel[,1]
-NumBricks <- 8        #Later can make this 11
-
-#Convert into array because I guess it has to be in this format
-NewArray <- array(0, Mask$dim)     #Same as NewArray <- array(0, c(64,76,64))
-NewArray <- array(0, c(1,3,1,NumBricks))
-for (i in 1:NumVoxels){
-  LmerOutputPerVoxel[]
-}
-NewArray[i,j,k,l] <- LmerOutputPerVoxel[1,2]
-MaskIndices <- LmerOutputPerVoxel
-
-#QQQ FIND OUT WHAT THIS MEANS - smap?
-#using single bracked [ results in many sublists with result.70$maskData etc.
-Results <- array(0, c(smap[[1]]$sdim, ncol(voxResults)))
-maskIndices <- smap[[1]]$maskIndices
-icnum <- smap[[1]]$ic
-
-
-#tile maskIndices ncol(voxResults) times and add 4th dim col
-#pracma and repmat are Matlab commands
-#Matlab has the repmat function documented a lot more clearly
-
-#It will be slower to loop through and put each ijkl in it's proper spot.  
-#Below we create a list for each stat brik, and then loop thorugh and populate each
-#Above is the same as doing below. He did this because there is another repmat in the "matlab" library, but that gets confused
-#ncol is the number of stats you have (essentially the nubmer of bricks you will create)
-#this creates a list of 
-library(pracma)
-maskIndicesMod <- cbind(repmat(maskIndices, ncol(voxResults), 1), rep(1:ncol(voxResults), each=nrow(voxResults)))
-
-#insert results into 4d array
-results[maskIndicesMod] <- as.matrix(voxResults)
-
-
-######################Write results in AFNI format#####################
-#SO: one optionnifti.image.write(results)
-
-numsubjects <- length(unique(voxcast$num_id))
-
-icAFNI <- new("afni", results, BYTEORDER_STRING="LSB_FIRST", TEMPLATE_SPACE="MNI",
-              ORIENT_SPECIFIC=as.integer(c(1,2,4)), #LPI
-              DATASET_DIMENSIONS=as.integer(c(64, 76, 64, 0, 0)),
-              DATASET_RANK=c(3L, as.integer(ncol(voxResults))),
-              TAXIS_NUMS=c(as.integer(ncol(voxResults)), 0L),
-              TYPESTRING="3DIM_HEAD_FUNC",
-              SCENE_DATA=c(2L, 11L, 1L), #2=tlrc view, 11=anat_buck_type, 1=3dim_head_func typestring
-              DELTA=c(-3, -3, 3),
-              ORIGIN=c(94.5, 130.5, -76.5),
-              BRICK_TYPES=rep(3L, ncol(voxResults)), #float
-              BRICK_LABS=paste(colnames(voxResults), collapse="~"), #"SDCorr~SDT~SDp~RTCorr~RTT~RTp~AgeCorr~AgeT~Agep",
-              IDCODE_STRING=paste("icbehavLMER", icnum, sep=""),
-              BRICK_STATAUX=c(
-                0, 2, 3, numsubjects, 1, 0, #first corr
-                1, 3, 1, numsubjects - 2, #first ttest (df = N - 2)
-                3, 2, 3, numsubjects, 1, 0, #second corr
-                4, 3, 1, numsubjects - 2, #second ttest (df = N - 2)
-                6, 2, 3, numsubjects, 1, 0,
-                7, 3, 1, numsubjects - 2) #third ttest (df = N - 2)
-              )
-
-#BRICK_STATAUX NOTES
-#first val is subbrik, 2 is FUNC_COR_TYPE, 3 is number of parameters to follow type, length of ids is num of samples in corr,
-#1 is number of fit parameters (?), 0 is number of covariates partialed out of correlation
-
-writeAFNI(icAFNI, file.path(icBaseDir, paste("ic", icnum, "behavLMER+tlrc", sep="")), verbose=TRUE)
-
-rm(icAFNI, results)
-gc()
-
-voxResults
-
-}
-
-
-##########################END!#########################
-
-#####FOR 3D DATA#################
-#3...Create empty matrix of type numeric to put values in
-#Beta<-numeric(NumVoxels)
-#Tstat<-numeric(NumVoxels)
-
-#4a... Only read in data files that are within the mask
-#for (a in 1:NumVoxels){
-#Pull the data for each of the voxels that are in the mask
-#  Beta[a]<-DataBeta[Indexijk[a,1], Indexijk[a,2], Indexijk[a,3]]
-#  Tstat[a]<-DataTstat[Indexijk[a,1], Indexijk[a,2], Indexijk[a,3]]
-#}
-
-#Create a composite data set and then save as data frame
-#Datamatrix<-cbind(Indexnumber, Beta, Tstat)    #Leave out x,y,z to minimize data set size
-#DemogMRI<-data.frame(Datamatrix)
-#as.data.frame(data)   #It could not convert my table so I used above instead
+save.image(file="lmr.RData")
+#
