@@ -18,7 +18,7 @@
 #
 
 root='/Volumes/Governator/ANTISTATELONG'
-listfile='backupfilesList.txt'
+listfile="$root/backupfilesList.txt"
 
 #subshell captures output of distinct find commands
 (
@@ -131,8 +131,8 @@ listfile='backupfilesList.txt'
 # check size
 totalsize=$(awk '{print "\"/Volumes/Governator/"$0"\""}' $listfile | xargs du -kc | awk '(/total/){sum+=$1}END{print sum/1024**2}' );
 
-if [ ${totalsize%%.*} -gt 600 ]; then
-  echo "Error: ${totalsize}G > 600G, not allowing transfer :(" | 
+if [ ${totalsize%%.*} -gt 1024 ]; then
+  echo "Error: ${totalsize}G > 1024G, not allowing transfer :(" | 
     tee >(cat 1>&2 ) |  
     mail -s "ANTISTATELONG Backup too large" willforan@gmail.com ordazs@upmc.edu
   exit
