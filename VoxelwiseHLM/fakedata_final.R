@@ -88,8 +88,8 @@ head(Demographics)
 #DataTstat$dim                                 #Confirm output value
 
 
-DataBeta  <- nifti.image.read("ASerror-Coef")   #Output will be 64x76x64x312
-DataTstat <- nifti.image.read("ASerror-Tstat")  #Output will be 64x76x64x312
+DataBeta  <- nifti.image.read("AScorrBeta")   #Output will be 64x76x64x312
+DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
 RdataName <- "ASerror" 
 #################### Read in mask (3D) #################
 
@@ -120,16 +120,16 @@ head(Indices)
 
 #^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
 # pre-allocate
-# Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
-#                        i=rep(NA_real_,3), 
-#                        j=rep(NA_real_,3), 
-#                        k=rep(NA_real_,3))
-# 
-# Indices$Indexnumber <- seq(300,302)
-# Indices$i <- sample(30:35,3)
-# Indices$j <- sample(29:32,3)
-# Indices$k <- sample(20:23,3)
-# NumVoxels <- 3
+ Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
+                        i=rep(NA_real_,3), 
+                        j=rep(NA_real_,3), 
+                        k=rep(NA_real_,3))
+ 
+ Indices$Indexnumber <- seq(300,302)
+ Indices$i <- sample(30:35,3)
+ Indices$j <- sample(29:32,3)
+ Indices$k <- sample(20:23,3)
+ NumVoxels <- 3
 # 
 # # check
 # cbind(NumVoxels, NumVisits)
@@ -195,15 +195,21 @@ for (a in 1:NumVoxels){
     #DemogMRI$Indexnumber[e] <- Indices$Indexnumber[a]
      
   }
-    
+  
+  #@@@@@@@@@@@@@@@@@@@@@ use lme4 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2222
   #...Run HLM lme4 for each voxel
   ##Random intercept: lmer1a0 <- lmer(y~x+(1|g))
   ##Random slope:     lmer1a1 <- lmer(y~x+(x|g))
   #Random intercept model 
-  #lmer1a0 <- lmer(Beta ~ age + (1 | lunaid), DemogMRI$Beta, REML=TRUE)  
-  #Random slope model   
+  lmer1a0 <- lmer(Beta ~ age + (1 | lunaID), DemogMRI, REML=TRUE)
+  #Random slope model
   lmer1a1 <- lmer(Beta ~ age + (age | lunaID), DemogMRI, REML=TRUE)
     
+  # get P value by Markov Chain Monte Carlo sim
+  #   only works on random intercept not slop ie. 1|lunaID   not  age|lunaID
+  test <- pvals.fnc(object=lmer1a0, nsim=500, withMCMC=TRUE, addplot=FALSE)
+  test$fixed$r_pMCMC <- 1-as.numeric(test$fixed$pMCMC)  
+
   LmerOutputPerVoxel[a,6]<-deviance(lmer1a1)  #Gives you REML estimate of deviance
   LmerOutputPerVoxel[a,5]<-AIC(lmer1a1)       #Just use AIC.  BIC additionally accounts for sample size; don't need it
 
@@ -219,13 +225,32 @@ for (a in 1:NumVoxels){
   LmerOutputPerVoxel[a, "varTau00"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["(Intercept)", "(Intercept)"]
   LmerOutputPerVoxel[a, "varTau11"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["age", "age"]
   #Not sure how to get sigma
+  
+  
+  #@@@@@@@@@@@@@@@ Use nmle @@@@@@@@@@@@@@@@@@@@@@@@@@@@@2222222 alternative
+  ##detach('lme4'); library(nlme)
+  #lme(Beta ~ age, random = ~ 1 | lunaID, data=DemogMRI)
+  #a<-lme(Beta ~ ageC + ageCsq, random =~ 1 | lunaID, data=DemogMRI)
+  #a<-lme(Beta ~ ageC + ageCsq, random =~ age | lunaID, data=DemogMRI)
+
+  #Random intercept model
+  nlme1a0 <- lme(Beta ~ ageC + ageCsq, random =~ 1 | lunaID, data=DemogMRI, control=c)
+  #Random slope model
+  c <- lmeControl(10001, 10001,opt="optim")  #You need to set this equal to something or it will disappear in thin air
+  nlme1a1<-lme(Beta ~ ageC + ageCsq, random =~ age | lunaID, data=DemogMRI, control=c)
+  
+  #AIC, Deviance
+  asumm$tTable  #FINISH
+  
+  nlme1a0summ <- summary(nlme1a0)
+  #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
 
   DemogMRI$Beta  <- NA_real_
   DemogMRI$Tstat <- NA_real_
 
   # clear before next round, just in case
-  rm(lmer1a1)
-  rm(lmer1a1summ)
+  #rm(lmer1a1)
+  #rm(lmer1a1summ)
 }
 
 

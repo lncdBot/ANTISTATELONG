@@ -3,7 +3,13 @@
 # Switch to oro.nifti
 library(oro.nifti)
 library(pracma)
-load("lmr2.RData") # load LmerOutputPerVoxel
+cmdargs = commandArgs(TRUE)
+#load("lmr2.RData") # load LmerOutputPerVoxel
+ # load LmerOutputPerVoxel
+tryCatch(
+  load(as.character(cmdargs[1])), 
+  error = function(e) {print("provide Rdata containing LmerOutputPerVoxel")}
+  )
 
 # make an array of 0's voxels down and results across (voxResults is number of stats .. num of bricks)
 #
@@ -55,7 +61,7 @@ results <- array(0, c(64,76,64, NumBricks))
 MaskIndices <- LmerOutputPerVoxel[,2:4] # i j k
 for (b in 1:NumBricks) {
                 # i                 j               k         "t"
- results[cbind(MaskIndices[,1],MaskIndices[,2],MaskIndices[,3],b)] <- LmerOutputPerVoxel[,(4+b)]
+ results[cbind(MaskIndices[,1]+1,MaskIndices[,2]+1,MaskIndices[,3]+1,b)] <- LmerOutputPerVoxel[,(4+b)]
 }
 
 ######################Write results in AFNI format#####################
@@ -68,6 +74,7 @@ AFNIout <- new("afni", results,
               BYTEORDER_STRING="LSB_FIRST",
               TEMPLATE_SPACE="MNI",
               ORIENT_SPECIFIC=as.integer(c(1,2,4)), #LPI
+              #ORIENT_SPECIFIC=as.integer(c(0,3,4)), #RAI
               DATASET_DIMENSIONS=as.integer(c(64, 76, 64, 0, 0)),
               DATASET_RANK=c(3L, as.integer(NumBricks)),
               TAXIS_NUMS=c(as.integer(NumBricks), 0L),
@@ -80,6 +87,16 @@ AFNIout <- new("afni", results,
               )
                          #was "SDCorr~SDT~SDp~RTCorr~RTT~RTp~AgeCorr~AgeT~Agep",
                          #now  "AIC~Deviance~BInt~BSlope~BIntSE~BSlopeSE~BIntT~BSlopeT~varSigma"
+#ORIENT_SPECIFIC = 
+#Three integer codes describing the spatial orientation
+#The possible codes are:
+#define ORI <- R2L <- TYPE  0  /* Right to Left         */
+#define ORI <- L2R <- TYPE  1  /* Left to Right         */
+#define ORI <- P2A <- TYPE  2  /* Posterior to Anterior */
+#define ORI <- A2P <- TYPE  3  /* Anterior to Posterior */
+#define ORI <- I2S <- TYPE  4  /* Inferior to Superior  */
+#define ORI <- S2I <- TYPE  5  /* Superior to Inferior  */
+
 #BRICK_STATAUX NOTES
 #first val is subbrik, 2 is FUNC_COR_TYPE, 3 is number of parameters to follow type, length of ids is num of samples in corr,
 #1 is number of fit parameters (?), 0 is number of covariates partialed out of correlation
@@ -98,13 +115,11 @@ AFNIout <- new("afni", results,
               #)
 
 
-writeAFNI(AFNIout, "AS_LMER+tlrc", verbose=TRUE)
+writeAFNI(AFNIout, paste("AS_LMER_","error" ,"+tlrc", sep=""), verbose=TRUE)
 
 rm(AFNIout, results)
 gc()
 
-
-}
 
 
 ##########################END!#########################
