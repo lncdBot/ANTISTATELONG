@@ -5,6 +5,7 @@
 # Modif: 	April 26, 2012  -- use weighted betas (WF)
 #			April 29, 2012 - re-ran on dACC only because 10138/060717162450 had bad stim times files, esp for errors (I don't think will affect AScorr estimates much)
 #			               - also ran on 4Errors for dACC10 - though I didn't bother to alter script for intermediate files
+#           May 2, 2012
 
 #File:		ROIs/applySpheres_weightedAvgBetas.bash
 #Dir: 		/Volumes/Governator/ANTISTATELONG/ROIs
@@ -33,30 +34,30 @@ conditiontype="ASerrorCorr" #"AScorr" "ASerrorCorr" "VGScorr"
 #date="$(date +%F)"
 conditionBeta="[6]" #[2]=AScorr, [6]=ASerrorCorr, [14]=VGScorr
 conditionTstat="[7]" #[3]=AScorr, [7]=ASerrorCorr, [15]=VGScorr
-special="_4ErrorTrials" #""
+special="" #"_4ErrorTrials"
+veryspecial="_AdditionalCensoring" #""
 
 # file and subbrick of beta's and standard error 
- betaBrick="glm_hrf_Stats${special}_REML.nii.gz${conditionBeta}"
-tstatBrick="glm_hrf_Stats${special}_REML.nii.gz${conditionTstat}"
+ betaBrick="glm_hrf${veryspecial}_Stats${special}_REML.nii.gz${conditionBeta}"
+tstatBrick="glm_hrf${veryspecial}_Stats${special}_REML.nii.gz${conditionTstat}"
 
 # for each ROI
 for ROI in \
-	dACC_10; do
-	#FEF_R FEF_L \
-	#SEF \
-	#preSMA \
-	#PPC_R PPC_L \
-	#putamen_R putamen_L \
-	#dlPFC_R dlPFC_L \
-	#vlPFC_R vlPFC_L \
-	#V1_bilat \
-	#insula_R insula_L \
-	#cerebellum_R cerebellum_L; do
-
+	FEF_R FEF_L \
+	SEF \
+	preSMA \
+	PPC_R PPC_L \
+	putamen_R putamen_L \
+	dlPFC_R dlPFC_L \
+	vlPFC_R vlPFC_L \
+	V1_bilat \
+	insula_R insula_L \
+	cerebellum_R cerebellum_L; do
+	#dACC_10; do
 
    echo "***********${ROI}****************"
 
-   roiFile=${rootdir}/ROIs/weightedBetas_sphere${special}_${method}_${conditiontype}_${ROI}.1D
+   roiFile=${rootdir}/ROIs/weightedBetas_sphere${veryspecial}${special}_${method}_${conditiontype}_${ROI}.1D
    roiMask=${rootdir}/ROIs/ROImask_sphere_${method}_${ROI}.nii
 
    # if roiFile exists, remove it 
@@ -87,8 +88,8 @@ for ROI in \
        
        
        # calculate two more niftis: b*e^-2 and e^-2
-       3dcalc -prefix "sqerr${special}.nii.gz"     -b $betaBrick -t $tstatBrick       -expr '(t/b)^2' -overwrite
-       3dcalc -prefix "weightedB${special}.nii.gz" -b $betaBrick -e "sqerr${special}.nii.gz[0]" -expr 'b*e'     -overwrite 
+       3dcalc -prefix "sqerr${veryspecial}${special}.nii.gz"     -b $betaBrick -t $tstatBrick       -expr '(t/b)^2' -overwrite
+       3dcalc -prefix "weightedB${veryspecial}${special}.nii.gz" -b $betaBrick -e "sqerr${veryspecial}${special}.nii.gz[0]" -expr 'b*e'     -overwrite 
 
        #
        # use makeave to find sum of roi matching voxels for each new nifiti
@@ -103,12 +104,12 @@ for ROI in \
 
        # numerator
        read sumBetaSqErr voxCount1 < <( 
-        3dmaskave -sum -mask $roiMask "weightedB${special}.nii.gz"  | 
+        3dmaskave -sum -mask $roiMask "weightedB${veryspecial}${special}.nii.gz"  | 
         sed -e "s/\[/	/; s/ voxels\]//" || echo "0 0" )
 
        # deomoniator 
        read sumSqErr  voxCount2 <  <( 
-         3dmaskave  -sum -mask $roiMask "sqerr${special}.nii.gz"    | 
+         3dmaskave  -sum -mask $roiMask "sqerr${veryspecial}${special}.nii.gz"    | 
          sed -e "s/\[/	/; s/ voxels\]//" || echo "0 0" )
 
        
