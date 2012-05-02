@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# 3dMEMA creates temp files
+# cannot have overlapping
+tempdir=$(mktemp -d CubeAScorr-tmp) 
+cd $tempdir
+3dMEMA \
+  -prefix /Volumes/Governator/ANTISTATELONG/AgeGrpAnalyses/3dMEMA/Cube_AScorr_Rnd \
+  -jobs 4 \
+  -covariates /Volumes/Governator/ANTISTATELONG/AgeGrpAnalyses/3dMEMA/covariateAge_Cube_AScorr.1D \
+  -covariates_name 'age age**2 age**3' \
+  -missing_data 0 \
+  -n_nonzero 128 \
+  -mask /Volumes/Governator/ANTISTATELONG/Reliability/mask+tlrc \
+  -set everyone \
+                  10309051205121315 /Volumes/Governator/ANTISTATELONG/10309/051205121315/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10309/051205121315/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10187051215162541 /Volumes/Governator/ANTISTATELONG/10187/051215162541/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10187/051215162541/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10204060105155654 /Volumes/Governator/ANTISTATELONG/10204/060105155654/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10204/060105155654/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10199060113155611 /Volumes/Governator/ANTISTATELONG/10199/060113155611/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10199/060113155611/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10196060114162842 /Volumes/Governator/ANTISTATELONG/10196/060114162842/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10196/060114162842/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10202060123155345 /Volumes/Governator/ANTISTATELONG/10202/060123155345/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10202/060123155345/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10200060202162452 /Volumes/Governator/ANTISTATELONG/10200/060202162452/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10200/060202162452/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10194060204095141 /Volumes/Governator/ANTISTATELONG/10194/060204095141/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10194/060204095141/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10198060206155700 /Volumes/Governator/ANTISTATELONG/10198/060206155700/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10198/060206155700/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10189060207154918 /Volumes/Governator/ANTISTATELONG/10189/060207154918/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10189/060207154918/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10134060209134325 /Volumes/Governator/ANTISTATELONG/10134/060209134325/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10134/060209134325/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10215060218111508 /Volumes/Governator/ANTISTATELONG/10215/060218111508/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10215/060218111508/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10217060227161522 /Volumes/Governator/ANTISTATELONG/10217/060227161522/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10217/060227161522/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10222060311142900 /Volumes/Governator/ANTISTATELONG/10222/060311142900/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10222/060311142900/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10150060323162830 /Volumes/Governator/ANTISTATELONG/10150/060323162830/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10150/060323162830/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10235060325143915 /Volumes/Governator/ANTISTATELONG/10235/060325143915/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10235/060325143915/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10278060330161349 /Volumes/Governator/ANTISTATELONG/10278/060330161349/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10278/060330161349/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10269060401113408 /Volumes/Governator/ANTISTATELONG/10269/060401113408/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10269/060401113408/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10177060408131155 /Volumes/Governator/ANTISTATELONG/10177/060408131155/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10177/060408131155/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10256060408142558 /Volumes/Governator/ANTISTATELONG/10256/060408142558/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10256/060408142558/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10279060410160830 /Volumes/Governator/ANTISTATELONG/10279/060410160830/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10279/060410160830/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10261060417162906 /Volumes/Governator/ANTISTATELONG/10261/060417162906/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10261/060417162906/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10148060424162317 /Volumes/Governator/ANTISTATELONG/10148/060424162317/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10148/060424162317/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10273060427161210 /Volumes/Governator/ANTISTATELONG/10273/060427161210/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10273/060427161210/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10297060506101902 /Volumes/Governator/ANTISTATELONG/10297/060506101902/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10297/060506101902/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10281060513154259 /Volumes/Governator/ANTISTATELONG/10281/060513154259/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10281/060513154259/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10306060525161836 /Volumes/Governator/ANTISTATELONG/10306/060525161836/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10306/060525161836/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10311060601160452 /Volumes/Governator/ANTISTATELONG/10311/060601160452/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10311/060601160452/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10170060603094618 /Volumes/Governator/ANTISTATELONG/10170/060603094618/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10170/060603094618/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10211060605164937 /Volumes/Governator/ANTISTATELONG/10211/060605164937/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10211/060605164937/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10305060608161920 /Volumes/Governator/ANTISTATELONG/10305/060608161920/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10305/060608161920/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10323060713162654 /Volumes/Governator/ANTISTATELONG/10323/060713162654/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10323/060713162654/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10136060715095530 /Volumes/Governator/ANTISTATELONG/10136/060715095530/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10136/060715095530/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10331060727155753 /Volumes/Governator/ANTISTATELONG/10331/060727155753/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10331/060727155753/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10330060729155605 /Volumes/Governator/ANTISTATELONG/10330/060729155605/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10330/060729155605/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10124060803163400 /Volumes/Governator/ANTISTATELONG/10124/060803163400/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10124/060803163400/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10342060810162342 /Volumes/Governator/ANTISTATELONG/10342/060810162342/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10342/060810162342/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10329060821164831 /Volumes/Governator/ANTISTATELONG/10329/060821164831/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10329/060821164831/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10336060824162803 /Volumes/Governator/ANTISTATELONG/10336/060824162803/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10336/060824162803/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10357060907162211 /Volumes/Governator/ANTISTATELONG/10357/060907162211/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10357/060907162211/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10345060914160717 /Volumes/Governator/ANTISTATELONG/10345/060914160717/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10345/060914160717/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10339060921161720 /Volumes/Governator/ANTISTATELONG/10339/060921161720/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10339/060921161720/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10195061030164251 /Volumes/Governator/ANTISTATELONG/10195/061030164251/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10195/061030164251/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10370061104095818 /Volumes/Governator/ANTISTATELONG/10370/061104095818/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10370/061104095818/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10176061106165928 /Volumes/Governator/ANTISTATELONG/10176/061106165928/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10176/061106165928/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10360061111142529 /Volumes/Governator/ANTISTATELONG/10360/061111142529/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10360/061111142529/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10361061111160713 /Volumes/Governator/ANTISTATELONG/10361/061111160713/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10361/061111160713/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10206070106133323 /Volumes/Governator/ANTISTATELONG/10206/070106133323/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10206/070106133323/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10180070113162039 /Volumes/Governator/ANTISTATELONG/10180/070113162039/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10180/070113162039/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10216070331101022 /Volumes/Governator/ANTISTATELONG/10216/070331101022/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10216/070331101022/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10185070426162723 /Volumes/Governator/ANTISTATELONG/10185/070426162723/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10185/070426162723/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10183070526133033 /Volumes/Governator/ANTISTATELONG/10183/070526133033/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10183/070526133033/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10230070627165959 /Volumes/Governator/ANTISTATELONG/10230/070627165959/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10230/070627165959/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10260070707094153 /Volumes/Governator/ANTISTATELONG/10260/070707094153/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10260/070707094153/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10156070707110749 /Volumes/Governator/ANTISTATELONG/10156/070707110749/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10156/070707110749/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10128070808162602 /Volumes/Governator/ANTISTATELONG/10128/070808162602/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10128/070808162602/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10263070924093111 /Volumes/Governator/ANTISTATELONG/10263/070924093111/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10263/070924093111/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10125070928185843 /Volumes/Governator/ANTISTATELONG/10125/070928185843/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10125/070928185843/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10188071017164109 /Volumes/Governator/ANTISTATELONG/10188/071017164109/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10188/071017164109/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10485071106142917 /Volumes/Governator/ANTISTATELONG/10485/071106142917/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10485/071106142917/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10385071114164529 /Volumes/Governator/ANTISTATELONG/10385/071114164529/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10385/071114164529/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10186071130171215 /Volumes/Governator/ANTISTATELONG/10186/071130171215/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10186/071130171215/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10175071203174809 /Volumes/Governator/ANTISTATELONG/10175/071203174809/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10175/071203174809/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10133071204164954 /Volumes/Governator/ANTISTATELONG/10133/071204164954/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10133/071204164954/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10451071218163034 /Volumes/Governator/ANTISTATELONG/10451/071218163034/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10451/071218163034/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10181080102135908 /Volumes/Governator/ANTISTATELONG/10181/080102135908/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10181/080102135908/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10132080104102455 /Volumes/Governator/ANTISTATELONG/10132/080104102455/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10132/080104102455/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10500080115174945 /Volumes/Governator/ANTISTATELONG/10500/080115174945/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10500/080115174945/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10192080119104956 /Volumes/Governator/ANTISTATELONG/10192/080119104956/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10192/080119104956/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10486080129184609 /Volumes/Governator/ANTISTATELONG/10486/080129184609/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10486/080129184609/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10529080219140951 /Volumes/Governator/ANTISTATELONG/10529/080219140951/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10529/080219140951/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10160080328093055 /Volumes/Governator/ANTISTATELONG/10160/080328093055/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10160/080328093055/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10542080331154925 /Volumes/Governator/ANTISTATELONG/10542/080331154925/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10542/080331154925/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10408080522155832 /Volumes/Governator/ANTISTATELONG/10408/080522155832/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10408/080522155832/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10223080619123313 /Volumes/Governator/ANTISTATELONG/10223/080619123313/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10223/080619123313/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10152080806151206 /Volumes/Governator/ANTISTATELONG/10152/080806151206/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10152/080806151206/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10174080828160901 /Volumes/Governator/ANTISTATELONG/10174/080828160901/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10174/080828160901/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10335081013170955 /Volumes/Governator/ANTISTATELONG/10335/081013170955/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10335/081013170955/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10472081117161855 /Volumes/Governator/ANTISTATELONG/10472/081117161855/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10472/081117161855/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10368081120161731 /Volumes/Governator/ANTISTATELONG/10368/081120161731/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10368/081120161731/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10343081202160138 /Volumes/Governator/ANTISTATELONG/10343/081202160138/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10343/081202160138/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10220081203162435 /Volumes/Governator/ANTISTATELONG/10220/081203162435/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10220/081203162435/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10344081204162652 /Volumes/Governator/ANTISTATELONG/10344/081204162652/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10344/081204162652/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10201081213085343 /Volumes/Governator/ANTISTATELONG/10201/081213085343/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10201/081213085343/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10162081215154852 /Volumes/Governator/ANTISTATELONG/10162/081215154852/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10162/081215154852/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10173090121161304 /Volumes/Governator/ANTISTATELONG/10173/090121161304/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10173/090121161304/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10483090202162031 /Volumes/Governator/ANTISTATELONG/10483/090202162031/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10483/090202162031/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10248090318160554 /Volumes/Governator/ANTISTATELONG/10248/090318160554/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10248/090318160554/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10358090328104011 /Volumes/Governator/ANTISTATELONG/10358/090328104011/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10358/090328104011/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10193090411105408 /Volumes/Governator/ANTISTATELONG/10193/090411105408/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10193/090411105408/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10167090512163950 /Volumes/Governator/ANTISTATELONG/10167/090512163950/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10167/090512163950/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10316090514143105 /Volumes/Governator/ANTISTATELONG/10316/090514143105/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10316/090514143105/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10315090604143532 /Volumes/Governator/ANTISTATELONG/10315/090604143532/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10315/090604143532/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10169090613104355 /Volumes/Governator/ANTISTATELONG/10169/090613104355/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10169/090613104355/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10300090617130615 /Volumes/Governator/ANTISTATELONG/10300/090617130615/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10300/090617130615/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10288090715125121 /Volumes/Governator/ANTISTATELONG/10288/090715125121/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10288/090715125121/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10153090728161522 /Volumes/Governator/ANTISTATELONG/10153/090728161522/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10153/090728161522/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10161090820142507 /Volumes/Governator/ANTISTATELONG/10161/090820142507/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10161/090820142507/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10129090825164254 /Volumes/Governator/ANTISTATELONG/10129/090825164254/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10129/090825164254/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10163091010091003 /Volumes/Governator/ANTISTATELONG/10163/091010091003/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10163/091010091003/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10365091027163830 /Volumes/Governator/ANTISTATELONG/10365/091027163830/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10365/091027163830/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10489100107120845 /Volumes/Governator/ANTISTATELONG/10489/100107120845/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10489/100107120845/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10221100123085705 /Volumes/Governator/ANTISTATELONG/10221/100123085705/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10221/100123085705/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10138100213112008 /Volumes/Governator/ANTISTATELONG/10138/100213112008/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10138/100213112008/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10409100420164252 /Volumes/Governator/ANTISTATELONG/10409/100420164252/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10409/100420164252/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10807100503163517 /Volumes/Governator/ANTISTATELONG/10807/100503163517/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10807/100503163517/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10226100505160750 /Volumes/Governator/ANTISTATELONG/10226/100505160750/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10226/100505160750/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10717100508094543 /Volumes/Governator/ANTISTATELONG/10717/100508094543/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10717/100508094543/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10686100519155724 /Volumes/Governator/ANTISTATELONG/10686/100519155724/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10686/100519155724/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10699100522091923 /Volumes/Governator/ANTISTATELONG/10699/100522091923/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10699/100522091923/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10333100602155417 /Volumes/Governator/ANTISTATELONG/10333/100602155417/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10333/100602155417/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10825100609160740 /Volumes/Governator/ANTISTATELONG/10825/100609160740/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10825/100609160740/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10527100626104222 /Volumes/Governator/ANTISTATELONG/10527/100626104222/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10527/100626104222/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10480101023122142 /Volumes/Governator/ANTISTATELONG/10480/101023122142/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10480/101023122142/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10479101120120436 /Volumes/Governator/ANTISTATELONG/10479/101120120436/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10479/101120120436/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10184101120153518 /Volumes/Governator/ANTISTATELONG/10184/101120153518/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10184/101120153518/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10359101122153412 /Volumes/Governator/ANTISTATELONG/10359/101122153412/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10359/101122153412/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10869101208165124 /Volumes/Governator/ANTISTATELONG/10869/101208165124/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10869/101208165124/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10470101218141509 /Volumes/Governator/ANTISTATELONG/10470/101218141509/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10470/101218141509/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10253110209170916 /Volumes/Governator/ANTISTATELONG/10253/110209170916/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10253/110209170916/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10878110226122311 /Volumes/Governator/ANTISTATELONG/10878/110226122311/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10878/110226122311/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10406110314170503 /Volumes/Governator/ANTISTATELONG/10406/110314170503/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10406/110314170503/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10252110412160841 /Volumes/Governator/ANTISTATELONG/10252/110412160841/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10252/110412160841/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10820110601171939 /Volumes/Governator/ANTISTATELONG/10820/110601171939/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10820/110601171939/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10816111109163617 /Volumes/Governator/ANTISTATELONG/10816/111109163617/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10816/111109163617/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10241111220144044 /Volumes/Governator/ANTISTATELONG/10241/111220144044/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10241/111220144044/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10477081118152142 /Volumes/Governator/ANTISTATELONG/10477/081118152142/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10477/081118152142/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10280070623150331 /Volumes/Governator/ANTISTATELONG/10280/070623150331/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10280/070623150331/analysis/glm_hrf_Stats_REML+tlrc[3] \
+                  10492071126090657 /Volumes/Governator/ANTISTATELONG/10492/071126090657/analysis/glm_hrf_Stats_REML+tlrc[2] /Volumes/Governator/ANTISTATELONG/10492/071126090657/analysis/glm_hrf_Stats_REML+tlrc[3] \  2>&1 |
+tee /Volumes/Governator/ANTISTATELONG/AgeGrpAnalyses/3dMEMA/out_Cube_AScorr.log
+rm $tempdir

@@ -9,21 +9,10 @@
 #         Don't run this in RStudio because it takes too long to load niftii files 
 
 ###############Load appropriate libraries############
-#library(foreach)
-#library(doSMP)
-#library(abind)
-#library(plyr)
-
-#library(fmri)
-
-#library(doSMP)
-#library(foreach)
-#library(reshape2)
-#library(languageR)
-#library(gdata)
-
 library(Rniftilib)
-library(lme4)
+#library(lme4)
+library(nlme)
+
 #library(oro.nifti)    #I do this later bc it seems to interfere with Rniftilib
 #library(pracma)       #I do this later
 
@@ -196,29 +185,119 @@ for (a in 1:NumVoxels){
      
   }
     
+  #@@@@@@@@@@@@@@@@@@@@@ use lme4 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  #IMPORTANT! We did not use this because you can't get the p value for the model with age as a random effect
   #...Run HLM lme4 for each voxel
   ##Random intercept: lmer1a0 <- lmer(y~x+(1|g))
   ##Random slope:     lmer1a1 <- lmer(y~x+(x|g))
-  #Random intercept model 
-  #lmer1a0 <- lmer(Beta ~ age + (1 | lunaid), DemogMRI$Beta, REML=TRUE)  
-  #Random slope model   
-  lmer1a1 <- lmer(Beta ~ age + (age | lunaID), DemogMRI, REML=TRUE)
+  ##Random intercept model 
+  #lmer1a0 <- lmer(Beta ~ age + (1 | lunaID), DemogMRI, REML=TRUE)
+  ##Random slope model
+  #lmer1a1 <- lmer(Beta ~ age + (age | lunaID), DemogMRI, REML=TRUE)
     
-  LmerOutputPerVoxel[a,6]<-deviance(lmer1a1)  #Gives you REML estimate of deviance
-  LmerOutputPerVoxel[a,5]<-AIC(lmer1a1)       #Just use AIC.  BIC additionally accounts for sample size; don't need it
+  ## get P value by Markov Chain Monte Carlo sim
+  ##   only works on random intercept not slop ie. 1|lunaID   not  age|lunaID
+  #test <- pvals.fnc(object=lmer1a0, nsim=500, withMCMC=TRUE, addplot=FALSE)
+  #test$fixed$r_pMCMC <- 1-as.numeric(test$fixed$pMCMC)  
 
-  lmer1a1summ <- summary(lmer1a1)
-  lmCoefs     <- lmer1a1summ@coefs  #:-)   #str(lmer1a1summ@coefs)  Stored as a matrix
-  LmerOutputPerVoxel[a, "BInt"]     <- lmCoefs["(Intercept)","Estimate"]     #Could also retrieve as lmCoefs[1,1]
-  LmerOutputPerVoxel[a, "BSlope"]   <- lmCoefs["age","Estimate"]             #Could also retrieve as lmCoefs[2,1]
-  LmerOutputPerVoxel[a, "BIntSE"]   <- lmCoefs["(Intercept)","Std. Error"]   #Could also retrieve as lmCoefs[1,2]
-  LmerOutputPerVoxel[a, "BSlopeSE"] <- lmCoefs["age","Std. Error"]           #Could also retrieve as lmCoefs[2,2]
-  LmerOutputPerVoxel[a, "BIntT"]    <- lmCoefs["(Intercept)","t value"]      #Could also retrieve as lmCoefs[1,3]
-  LmerOutputPerVoxel[a, "BSlopeT"]  <- lmCoefs["age","t value"]              #Could also retrieve as lmCoefs[2,3]
-  #list(coefs=lmer1a1summ@coefs, AIC(lmer1a1))
-  LmerOutputPerVoxel[a, "varTau00"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["(Intercept)", "(Intercept)"]
-  LmerOutputPerVoxel[a, "varTau11"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["age", "age"]
-  #Not sure how to get sigma
+  #LmerOutputPerVoxel[a,6]<-deviance(lmer1a1)  #Gives you REML estimate of deviance
+  #LmerOutputPerVoxel[a,5]<-AIC(lmer1a1)       #Just use AIC.  BIC additionally accounts for sample size; don't need it
+
+  #lmer1a1summ <- summary(lmer1a1)
+  #lmCoefs     <- lmer1a1summ@coefs  #:-)   #str(lmer1a1summ@coefs)  Stored as a matrix
+  #LmerOutputPerVoxel[a, "BInt"]     <- lmCoefs["(Intercept)","Estimate"]     #Could also retrieve as lmCoefs[1,1]
+  #LmerOutputPerVoxel[a, "BSlope"]   <- lmCoefs["age","Estimate"]             #Could also retrieve as lmCoefs[2,1]
+  #LmerOutputPerVoxel[a, "BIntSE"]   <- lmCoefs["(Intercept)","Std. Error"]   #Could also retrieve as lmCoefs[1,2]
+  #LmerOutputPerVoxel[a, "BSlopeSE"] <- lmCoefs["age","Std. Error"]           #Could also retrieve as lmCoefs[2,2]
+  #LmerOutputPerVoxel[a, "BIntT"]    <- lmCoefs["(Intercept)","t value"]      #Could also retrieve as lmCoefs[1,3]
+  #LmerOutputPerVoxel[a, "BSlopeT"]  <- lmCoefs["age","t value"]              #Could also retrieve as lmCoefs[2,3]
+  ##list(coefs=lmer1a1summ@coefs, AIC(lmer1a1))
+  #LmerOutputPerVoxel[a, "varTau00"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["(Intercept)", "(Intercept)"]
+  #LmerOutputPerVoxel[a, "varTau11"] <- attr(VarCorr(lmer1a1)[["lunaID"]], "correlation")["age", "age"]
+  ##Not sure how to get sigma
+  
+  #@@@@@@@@@@@@@@@ Use nmle @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  ##detach('lme4'); library(nlme)
+  c <- lmeControl(10001, 10001,opt="optim")  #You need to set this equal to something or it will disappear in thin air
+  
+  #a0: no age term modeled
+  #a1: invageC model
+  #a2: ageC model
+  #a3: ageC + ageCsq model
+  
+  #For purposes of picking which model is best, we will just run model nlme3 for all (or nlme4 for quadratic)
+  #        Rand Int?    Rand B1?    Rand B2?
+  #nlme0:     No            No         -
+  #nlme1:     Yes           No/-         -
+  #nlme2:     No            Yes        -
+  #nlme3:     Yes           Yes        -
+  #nlme4:     Yes           Yes        Yes
+  
+  #Random intercept model:  lme(Beta ~ ageC, random =~ 1 | lunaID, data=DemogMRI, control=c)
+  #Random slope model:      lme(Beta ~ ageC, random =~ ageC | lunaID, data=DemogMRI, control=c)
+  
+  #WILL - can you finish this?
+  #B0:   Xsumm$coefficients(INtercept)
+  #B1:   Xsumm$coefficients/age_invage
+  #B2:   Xsumm$coefficients/ageSq
+  #AIC:  Xsumm$AIC
+  #Deviance:   Xsumm$logLik
+  #StdDev of "residual":  Xsumm$StdDev/Residual *Not this table gets turned around depending on how many predictors in the model
+  #StdDev of B0: STdDev(Intercept)
+  #StdDev of B1: StdDev/ageC-invageC
+  #StdDev of B2: StdDev/ageCsq
+  
+  ######Part 1: Pick the model on the basis of whether there's a sig devt effect, significant Betas, R2 vs base model, sign of Beta
+  #Key: "-" means we don't care what it is'
+  #            invageB0, invageB1,  ageB0, invageB1,    agesqB0, agesqB1, agesqB2   ValueageB0  ValueageB1, ValueinvageB1, ValueagesqB2
+  ##Group 1:       n.s.    n.s.     n.s.      n.s.          n.s.    n.s.     n.s.                 No devt change and no brain activity in that region 
+  ##Group 2a:      sig     n.s.     sig       n.s.            -     n.s.     n.s.        pos      No devt change, but positive intercept 
+  ##Group 2b:      sig     n.s.     sig       n.s.            -     n.s.     n.s.        neg      No devt change, but negative intercept
+  ##Group 3a&b:      -     sig       -          -             -      -         -                  Sig devt change - inverse (not mutually exclusive)
+  ##Group 4a&b:      -       -       -        sig             -      -         -                  Sig devt change - linear (not mutually exclusive)     
+  ##Group 5a&b:      -       -       -          -             -      -       sig                  Sig devt change - quadratic (not mutually exclusive)
+  ##Group 6a&b:    pseudo-R2 is max for invage model
+  ##Group 7a&b:    pseudo-R2 is max for age model
+  ##Group 8a&b:    pseudo-R2 is max for agesq model
+  
+  #nlme4a3: ageCsq - all terms random
+  nlme4a3<-lme(Beta ~ ageC + ageCsq, random =~ ageCSq | lunaID, data=DemogMRI, control=c)
+  nlme4a3summ <- summary(nlme4a3)
+  #WILL - Pull B0, B1, B2, each t value, and each p value from Fixed effects table (9 bricks)
+  #WILL - Pull StdDev of "Residual", B0, B1 and B2 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11, T22) (4 bricks)
+  #WILL - Pull AIC, Deviance (2 bricks)
+  
+  #nlme3a2: ageC - all terms random
+  nlme3a2 <- lme(Beta ~ ageC, random =~ ageC | lunaID, data=DemogMRI, control=c)
+  nlme3a2 <- summary(nlme3a2)
+  #WILL - Pull B0, B1, each t value, and each p value from Fixed effects table
+  #WILL - Pull StdDev of "Residual", B0 and B1 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11)
+  #WILL - Pull AIC, Deviance 
+
+  #nlme3a1: invageC - all terms random
+  nlme3a1 <- lme(Beta ~ invageC, random =~ invageC | lunaID, data=DemogMRI, control=c) 
+  nlme3a1 <- summary(nlme3a1)
+  #WILL - Pull B0, B1, each t value, and each p value from Fixed effects table
+  #WILL - Pull StdDev of "Residual", B0 and B1 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11)
+  #WILL - Pull AIC, Deviance
+  
+  #nlme1a0: no age - all terms random (base model)
+  nlme1a0 <- update(nlme3a2, - ageC)  #WILL - check this.  Need a model with only the intercept
+  nlme3a0 <- summary(nlme3a0)  
+  #WILL - Pull B0,t value, andp value from Fixed effects table
+  #WILL - Pull StdDev of "Residual", B0 from the Random effects table and then square to get the variance component (Sigma2, T00)
+  #WILL - Pull AIC, Deviance
+  
+  #Proportion of variance explained at level 1
+  #WILL - Calculate pseudo-R2 for ageCsq model= (nlme3a0.Sigma2 - nlme3a3.Sigma2)/(nlme3a0.Sigma2)
+  #WILL - Calculate pseudo-R2 for ageC model= (nlme3a0.Sigma2 - nlme3a2.Sigma2)/(nlme3a0.Sigma2)
+  #WILL - Calculate pseudo-R2 for invageC model= (nlme3a0.Sigma2 - nlme3a1.Sigma2)/(nlme3a0.Sigma2)
+  
+  asumm$tTable  #FINISH - WILL - What was this?? I forgot what we were doing
+  
+  #LATER: WE will run some models to determine whether ints and slopes should be random ()
+  
+  #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   DemogMRI$Beta  <- NA_real_
   DemogMRI$Tstat <- NA_real_

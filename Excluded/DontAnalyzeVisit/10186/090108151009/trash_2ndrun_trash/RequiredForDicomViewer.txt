@@ -1,0 +1,7 @@
+This text file is required for proper operation of the
+Dicom Viewer.  It is important that the file be
+named 'RequiredForDicomViewer.txt' so that this
+directory will be automatically recognized.  This
+file should be copied to any directory with the
+following extensions (.dcm, .gif), if the file is
+missing or corrupted in any way.
