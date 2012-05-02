@@ -24,7 +24,7 @@ library(nlme)
 #OnlySigTValues <- 0    #Change this setting to 1 if you want to only import Betas with significant T values
 
 ################Generate demographics data ("DemographicsPerVoxelVisit")#################
-
+print("building inputs")
 #... Read in list of lunaID, bircID, age, 
 #Will created script in /Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 #Output will be in the same order
@@ -57,8 +57,7 @@ Demographics$ID <- NA_integer_
 Demographics$ID <- seq(1,312)
 
 
-meanAge
-invMeanAge
+print(paste("Age: mean", meanAge, "invMean", invMeanAge))
 head(Demographics)
 
 
@@ -77,9 +76,12 @@ head(Demographics)
 #DataTstat$dim                                 #Confirm output value
 
 
-DataBeta  <- nifti.image.read("ASerror-Coef")   #Output will be 64x76x64x312
-DataTstat <- nifti.image.read("ASerror-Tstat")  #Output will be 64x76x64x312
-RdataName <- "ASerror" 
+#DataBeta  <- nifti.image.read("ASerror-Coef")   #Output will be 64x76x64x312
+#DataTstat <- nifti.image.read("ASerror-Tstat")  #Output will be 64x76x64x312
+#RdataName <- "ASerror" 
+DataBeta  <- nifti.image.read("AScorrBeta")   #Output will be 64x76x64x312
+DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
+RdataName <- "AScorr-TEST" 
 #################### Read in mask (3D) #################
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
@@ -142,31 +144,50 @@ DemogMRI             <- Demographics
 DemogMRI$Indexnumber <- NA_real_
 DemogMRI$Beta        <- NA_real_
 DemogMRI$Tstat       <- NA_real_
-head(DemogMRI)
 
 
 ################ For each voxel (67,000+), generate a file AND run HLM ############################
 
-#... Create data frame for holding HLM output.  One row per voxel
-LmerOutputPerVoxel  <- data.frame( Indexnumber=rep(NA_real_,NumVoxels),
-                                    i=rep(NA_real_,NumVoxels),
-                                    j=rep(NA_real_,NumVoxels),
-                                    k=rep(NA_real_,NumVoxels),
-                                    AIC=rep(NA_real_,NumVoxels),
-                                    Deviance=rep(NA_real_,NumVoxels),
-                                    BInt=rep(NA_real_,NumVoxels),
-                                    BSlope=rep(NA_real_,NumVoxels), #this is the important one
-                                    BIntSE=rep(NA_real_,NumVoxels),
-                                    BSlopeSE=rep(NA_real_,NumVoxels),
-                                    BIntT=rep(NA_real_,NumVoxels),
-                                    BSlopeT=rep(NA_real_,NumVoxels),
-                                    varSigma=rep(NA_real_,NumVoxels),
-                                    varTau00=rep(NA_real_,NumVoxels), 
-                                    varTau11=rep(NA_real_,NumVoxels))
-head(LmerOutputPerVoxel)
+
+# where in the summary data things are located, used much later
+btp.idxs=list( list("p",5), list("t", 4), list("b", 1) )
+# record number of vars for each model type
+sizes=data.frame(null=3,age=3,invAge=3,ageSq=3)
+# Create data frame for holding HLM output.  One row per voxel
+LmerOutputPerVoxel= data.frame(Indexnumber=rep(NA_real_,NumVoxels))
+
+# create a column for each type of output we're interested in
+#,"AIC","Deviance","ResStdErr","R2" )
+for ( type in list(
+
+        # normal fields
+        "i","j","k",
+        
+        # create model.type##    eg. invAge.b0
+        #   combine all the models with 0:modelVars with b,p, and t
+        #    here s is the size, n is the model name
+        sapply( names(sizes), function(n) paste( n,                                       # prepend model. to everything
+          c(
+           "AIC", "Deviance", "R2","Residual",                                            #  list of generic stats in every model
+           paste( 'var',  0:sizes[[n]],  sep=""),                                         #  list of all possibe var0..var3
+           sapply(0:(sizes[[n]]-1), function (s) paste( cbind("b","p","t"), s, sep=""))   #  create matrix of all p0..p2,t0..t2,b0..b2
+          )
+         ,sep="."))
+        )) {  
+
+     # set type to all zerso (type like "i" or invAge.b0 )
+     LmerOutputPerVoxel[,type] <- NA_real_ 
+}  
+
+print("Starting calculations ...")
 
 #...For each voxel....(This loop goes through 67,976 times..except 3 times for ^^FAKE DATA^^^)
 for (a in 1:NumVoxels){
+
+
+  # give output every once and awhile so we know it's working
+  if( a %% 10 == 0 )  print(paste('on voxel ',  a, 'loc ',  Indices$i[a], Indices$j[a], Indices$k[a] ))
+  
   
   # copy indecies into lmeroutput
   LmerOutputPerVoxel$Indexnumber[a] <- Indices$Indexnumber[a]
@@ -176,6 +197,7 @@ for (a in 1:NumVoxels){
   
   #...Pull the data for each of the voxels that are within the mask (This loops 312 times)
   for (e in 1:NumVisits){
+
                            # the value at this voxel (i,j,k) and timepoint (e) 
     DemogMRI$Beta[e]  <- DataBeta[ Indices$i[a], Indices$j[a], Indices$k[a], e]   #TO DO: Make sure this works
     DemogMRI$Tstat[e] <- DataTstat[Indices$i[a], Indices$j[a], Indices$k[a], e]
@@ -217,8 +239,9 @@ for (a in 1:NumVoxels){
   ##Not sure how to get sigma
   
   #@@@@@@@@@@@@@@@ Use nmle @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  ##detach('lme4'); library(nlme)
   c <- lmeControl(10001, 10001,opt="optim")  #You need to set this equal to something or it will disappear in thin air
+  # sets number of iterations  before erroring to 10001
+  # use old algorithm (optim)
   
   #a0: no age term modeled
   #a1: invageC model
@@ -260,30 +283,86 @@ for (a in 1:NumVoxels){
   ##Group 7a&b:    pseudo-R2 is max for age model
   ##Group 8a&b:    pseudo-R2 is max for agesq model
   
-  #nlme4a3: ageCsq - all terms random
-  nlme4a3<-lme(Beta ~ ageC + ageCsq, random =~ ageCSq | lunaID, data=DemogMRI, control=c)
-  nlme4a3summ <- summary(nlme4a3)
+  
+  # generate all the models!
+  nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | lunaID, data=DemogMRI)            # nlme1a0: no age - all terms random (base model)
+  nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | lunaID, data=DemogMRI, control=c) # nlme3a1: invageC - all terms random
+  nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | lunaID, data=DemogMRI, control=c) # nlme3a2: ageC - all terms random
+  nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | lunaID, data=DemogMRI, control=c) # nlme4a3: ageCsq - all terms random
+  #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
+
+
+  # get the summary of each model in a cute structure
+  models <- list( list("ageSq" , summary(nlme4a3) ),
+                  list("age"   , summary(nlme3a2) ),
+                  list("invAge", summary(nlme3a1) ),
+                  list("null"  , summary(nlme1a0) )  )
+
+  # and while we're here, get the sigma^2 of null
+  nullSigma2 <- models[[4]][[2]]$sigma^2
+
+  # nlme4a3s$tTable
+  #                  Value    Std.Error   DF    t-value    p-value
+  #(Intercept)  0.0070257393 0.0037505569 181  1.8732523 0.06264565
+  #ageC        -0.0007646858 0.0007346395 181 -1.0408993 0.29931065
+  #ageCsq       0.0001248484 0.0001267124 181  0.9852898 0.32579701
+  #                  Value    Std.Error   DF    t-value    p-value
+  #(Intercept)    B0 [1,1]                       t0 [1,4]  p0 [1,5]
+  #ageC           B1 [2,1]                       t1 [2,4]  p1 [2,5]
+  #ageCsq         B2 [3,1]                       t2 [3,4]  p2 [3,5]
+  #
+  #LmerOutputPerVoxel[a, "BSlope"]   <- lmCoefs["age","Estimate"]             #Could also retrieve as lmCoefs[2,1]
+  #LmerOutputPerVoxel[a,paste('b',1:3)] <- nlme4a3s$tTable[,1]
+  #LmerOutputPerVoxel[a,paste('t',1:3)] <- nlme4a3s$tTable[,4]
+  #LmerOutputPerVoxel[a,paste('p',1:3)] <- nlme4a3s$tTable[,5]
+
+  # for each type and it's index (p->5, t->4, b->1)
+  #  add as many values of that type to LmerOutputPerVoxel eg for nlme4a3 add b0 b1 and b2
+  for ( m in models) {
+     mName <- m[[1]] # model name
+     mSumm <- m[[2]] # model summary
+
+     for ( btp in btp.idxs ) {
+        type     <- paste(mName, btp[[1]], sep=".")                         # eg. InvAge.p0
+        indx     <- btp[[2]]                                                # eg. 5
+        vals     <- as.numeric(mSumm$tTable[,indx]);                        # eg. .0005 .002 .01
+        nameIdxs <- as.vector(paste( type, 0:(length(vals)-1),  sep="" )  ) # eg. ("InvAge.p0", "InvAge.p1", "InvAge.p2")
+
+        # put the value in the name it belongs
+        LmerOutputPerVoxel[a,nameIdxs] <-  vals;
+
+     }
+
+     # get individual values and put in model.valuename
+     LmerOutputPerVoxel[a, paste(mName,"AIC",sep=".")]      <-  mSumm$AIC;
+     LmerOutputPerVoxel[a, paste(mName,"Deviance",sep=".")] <-  mSumm$logLik*-2;
+     
+     # pseudo R^2
+     LmerOutputPerVoxel[a,paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
+
+
+     # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
+     vals     <- VarCorr(mSumm)[,1]
+     LmerOutputPerVoxel[a,paste(mName,"Residual",sep=".")] <-  vals["Residual"]
+     len      <-length(vals)
+
+     mName    <- paste(mName, ".var",sep="")
+     nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
+     LmerOutputPerVoxel[a,nameIdxs] <-  vals[1:(len-1)]
+  }
+  #L[1,as.vector(factor(c("p1","p2")))] <- as.numeric(nlme4a3s$tTable[1:2,5])
   #WILL - Pull B0, B1, B2, each t value, and each p value from Fixed effects table (9 bricks)
   #WILL - Pull StdDev of "Residual", B0, B1 and B2 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11, T22) (4 bricks)
   #WILL - Pull AIC, Deviance (2 bricks)
-  
-  #nlme3a2: ageC - all terms random
-  nlme3a2 <- lme(Beta ~ ageC, random =~ ageC | lunaID, data=DemogMRI, control=c)
-  nlme3a2 <- summary(nlme3a2)
+  # nlme3a2
   #WILL - Pull B0, B1, each t value, and each p value from Fixed effects table
   #WILL - Pull StdDev of "Residual", B0 and B1 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11)
   #WILL - Pull AIC, Deviance 
-
-  #nlme3a1: invageC - all terms random
-  nlme3a1 <- lme(Beta ~ invageC, random =~ invageC | lunaID, data=DemogMRI, control=c) 
-  nlme3a1 <- summary(nlme3a1)
+  #nlme3a1
   #WILL - Pull B0, B1, each t value, and each p value from Fixed effects table
   #WILL - Pull StdDev of "Residual", B0 and B1 from the Random effects table and then square each to get the variance components (Sigma2, T00, T11)
   #WILL - Pull AIC, Deviance
-  
   #nlme1a0: no age - all terms random (base model)
-  nlme1a0 <- update(nlme3a2, - ageC)  #WILL - check this.  Need a model with only the intercept
-  nlme3a0 <- summary(nlme3a0)  
   #WILL - Pull B0,t value, andp value from Fixed effects table
   #WILL - Pull StdDev of "Residual", B0 from the Random effects table and then square to get the variance component (Sigma2, T00)
   #WILL - Pull AIC, Deviance
@@ -292,24 +371,29 @@ for (a in 1:NumVoxels){
   #WILL - Calculate pseudo-R2 for ageCsq model= (nlme3a0.Sigma2 - nlme3a3.Sigma2)/(nlme3a0.Sigma2)
   #WILL - Calculate pseudo-R2 for ageC model= (nlme3a0.Sigma2 - nlme3a2.Sigma2)/(nlme3a0.Sigma2)
   #WILL - Calculate pseudo-R2 for invageC model= (nlme3a0.Sigma2 - nlme3a1.Sigma2)/(nlme3a0.Sigma2)
-  
-  asumm$tTable  #FINISH - WILL - What was this?? I forgot what we were doing
+  #Proportion of variance explained at level 1
+  #WILL - Calculate pseudo-R2 for ageCsq model= (nlme3a0.Sigma2 - nlme3a3.Sigma2)/(nlme3a0.Sigma2)
+  #                                                null               age2          null
+  #WILL - Calculate pseudo-R2 for ageC model= (nlme3a0.Sigma2 - nlme3a2.Sigma2)/(nlme3a0.Sigma2)
+  #                                                 null             age         null
+  #WILL - Calculate pseudo-R2 for invageC model= (nlme3a0.Sigma2 - nlme3a1.Sigma2)/(nlme3a0.Sigma2)
+  #                                                   null        - inv             /null
   
   #LATER: WE will run some models to determine whether ints and slopes should be random ()
   
   #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+  # clear Beta dn Tstat
   DemogMRI$Beta  <- NA_real_
   DemogMRI$Tstat <- NA_real_
-
-  # clear before next round, just in case
-  rm(lmer1a1)
-  rm(lmer1a1summ)
+  #break
 }
 
 
-###############Fork to run on multiple processors##################################              
+########Fork to run on multiple processors#
 #QQQ How to do this?  Where to insert?
+###########################################
 
+print("saving output ")
 save.image(file=paste(RdataName, "lmr.RData", sep="_"))
 #
