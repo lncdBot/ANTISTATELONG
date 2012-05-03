@@ -1,12 +1,17 @@
 #Author: Sarah Ordaz
 #Date:   April 23, 2012
+#Mod :   May   03, 2012 (WF)
+#       now runs in parallel
 
-#File: runVoxelwiseHLMorig.R
-#Dir: /Volumes/Governator/ANTISTATELONG/VoxelwiseHLM  (but currently on Desktop)
+#File: runVoxelwiseHLM_parallel.R
+#Dir: /Volumes/Governator/ANTISTATELONG/VoxelwiseHLM
 
-#Purpose: To run a voxelwise HLM 
-#Notes:   This is a more efficient version of "runVoxelwiseHLMorig.R"
-#         Don't run this in RStudio because it takes too long to load niftii files 
+#Purpose: To run and compare 3 voxelwise HLMs "quickly" (e.g. 10 hours)
+#Notes:   
+#     * uses lme4 with old model and 1000 iterations 
+#      for 3 fits on all (>67,000) voxels
+#     * use doMC for parallization
+#        externalprt error with doSNOW
 
 ###############Load appropriate libraries############
 library(Rniftilib)
@@ -15,27 +20,17 @@ library(nlme)
 # do things in parallel
 #require(snow)
 #require(doSNOW) 
-#registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") )
+#registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
 registerDoMC(10)
 require(foreach)
 
 
-#library(oro.nifti)    #I do this later bc it seems to interfere with Rniftilib
-#library(pracma)       #I do this later
-
-#################Set variables############
-
-#setwd("/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/")
-#setwd("./")
-
-#OnlySigTValues <- 0    #Change this setting to 1 if you want to only import Betas with significant T values
-
 ################Generate demographics data ("DemographicsPerVoxelVisit")#################
 print("building inputs")
 
 #/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
-#Output will be in the same order
+# 10124	060803163400	12.97741273100616	1
 Demographics        <- read.table("listage.txt")
 names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 
@@ -67,15 +62,13 @@ Demographics$ID <- seq(1,312)
 
 
 ################# Read in subject data (4D) #################
+RdataName <- "AScorr-PAR" 
 DataBeta  <- nifti.image.read("AScorrBeta")   #Output will be 64x76x64x312
 DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
-RdataName <- "AScorr-PAR" 
-
-#################### Read in mask (3D) #################
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
-#$$$$$Q: I think these niftis have been converted from RAM --> LPI
-Mask <- nifti.image.read("mask_copy")  #Output will be three values (64x76x64)
+# niftis orientation converted from RAM --> LPI (hopefully)
+Mask <- nifti.image.read("mask_copy")        #Output will be (64x76x64)
 
 #... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
 Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
@@ -86,7 +79,8 @@ IndicesMatrix  <- cbind(Indexnumber, Indexijk)        # Matrix with both types o
 Indices        <- as.data.frame(IndicesMatrix)
 names(Indices) <- c("Indexnumber","i", "j", "k")      # make a data frame and label what column is what
 
-NumVoxels      <- length(Indexijk[,1])                          #This will be 67,976
+NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
+#NumVisits <- DataBeta$dim[4]                         # This would be 312
 
 #^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
 # pre-allocate
@@ -103,9 +97,6 @@ NumVoxels      <- length(Indexijk[,1])                          #This will be 67
 # 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-########### Compile variables summarizing numbers ################
-
-NumVisits <- DataBeta$dim[4]                              #This will be 312
 
 ################ Generate data frame ("DemogMRI") that's 312 rows long ############################
 
@@ -118,11 +109,13 @@ DemogMRI$Tstat       <- NA_real_
 
 ###### Set up giant output dataframe ####################
 
-# Create data frame for holding HLM output.  One row per voxel
+# data.frame for holding HLM output field names, built up using typelist
 perVoxelModelInfo   <-  data.frame(Indexnumber=NA_real_)
-# where in the summary data things are located, used much later
+
+# on what indices useful output (e.g pvals) are located on in the model summary, used much later
 btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
-# list for voxels that we can't build a model for
+
+# list for voxels that lme fails to fit (singularities)
 badVoxels           <- list()
 
 # record number of vars for each model type
@@ -141,7 +134,7 @@ typelist <- list(
   sapply( names(sizes), function(n) paste( n,                                       # prepend model. to everything
     c(
      "AIC", "Deviance", "R2","Residual",                                            #  list of generic stats in every model
-     paste( 'var',  0:(if (sizes[[n]] > 1) sizes[[n]]-2 else 0),  sep=""),          #  list of all possibe var0..var3
+     paste( 'var',  0:(if (sizes[[n]] > 1) sizes[[n]]-2 else 0),  sep=""),          #  list of all possibe var0..var1
      sapply(0:(sizes[[n]]-1), function (s) paste( cbind("b","p","t"), s, sep=""))   #  create matrix of all p0..p2,t0..t2,b0..b2
     )
    ,sep="."))
@@ -221,7 +214,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
 
   # for each type and it's index (p->5, t->4, b->1)
-  #  add as many values of that type to LmerOutputPerVoxel eg for nlme4a3 add b0 b1 and b2
+  #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
   for ( m in models) {
      mName <- m[[1]] # model name
      mSumm <- m[[2]] # model summary
@@ -247,6 +240,8 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
      # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
      vals     <- VarCorr(mSumm)[,1]
+
+     # risudal is always the last thing (variable end indx) so get it by name
      singleRow[paste(mName,"Residual",sep=".")] <-  vals["Residual"]
      len      <-length(vals)
 
@@ -255,7 +250,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
      singleRow[nameIdxs] <-  vals[1:(len-1)]
   }
-  singleRow  # this is the return value of foreach
+  singleRow  # this is the return value of foreach, put into LmerOutputPerVoxel
 }
 
 

@@ -1,7 +1,7 @@
 #Author: Sarah Ordaz
 #Date:   April 23, 2012
 
-#File: runVoxelwiseHLMorig.R
+#File: runVoxelwiseHLM_FINAL.R
 #Dir: /Volumes/Governator/ANTISTATELONG/VoxelwiseHLM  (but currently on Desktop)
 
 #Purpose: To run a voxelwise HLM 
