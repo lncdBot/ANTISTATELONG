@@ -164,7 +164,7 @@ for ( type in list(
         "i","j","k",
         
         # create model.type##    eg. invAge.b0
-        #   combine all the models with 0:modelVars with b,p, and t
+        #   combine all the models with numbers 0 to modelVars with b,p, and t
         #    here s is the size, n is the model name
         sapply( names(sizes), function(n) paste( n,                                       # prepend model. to everything
           c(
@@ -179,14 +179,19 @@ for ( type in list(
      LmerOutputPerVoxel[,type] <- NA_real_ 
 }  
 
-print("Starting calculations ...")
+
+# list for voxels that we can't build a model for
+badVoxels=list()
+
+
+print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 
 #...For each voxel....(This loop goes through 67,976 times..except 3 times for ^^FAKE DATA^^^)
 for (a in 1:NumVoxels){
 
 
-  # give output every once and awhile so we know it's working
-  if( a %% 10 == 0 )  print(paste('on voxel ',  a, 'loc ',  Indices$i[a], Indices$j[a], Indices$k[a] ))
+  # give output every once and awhile so we know it's working: "09:24:04 on voxel  10 loc  33 28 4"
+  if( a %% 10 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  a, 'loc ',  Indices$i[a], Indices$j[a], Indices$k[a] ))
   
   
   # copy indecies into lmeroutput
@@ -284,12 +289,22 @@ for (a in 1:NumVoxels){
   ##Group 8a&b:    pseudo-R2 is max for agesq model
   
   
-  # generate all the models!
-  nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | lunaID, data=DemogMRI)            # nlme1a0: no age - all terms random (base model)
-  nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | lunaID, data=DemogMRI, control=c) # nlme3a1: invageC - all terms random
-  nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | lunaID, data=DemogMRI, control=c) # nlme3a2: ageC - all terms random
-  nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | lunaID, data=DemogMRI, control=c) # nlme4a3: ageCsq - all terms random
-  #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
+  # attempt to generate models
+  attempt <- try({
+     nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | lunaID, data=DemogMRI)            # nlme1a0: no age
+     nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | lunaID, data=DemogMRI, control=c) # nlme3a1: invageC
+     nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | lunaID, data=DemogMRI, control=c) # nlme3a2: ageC
+     nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | lunaID, data=DemogMRI, control=c) # nlme4a3: ageCsq
+     #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
+  })
+  # if there was an error (sigularity?)
+  if(class(attempt) == "try-error") {
+    print(   paste("	*incomplete model(s) for voxel ",a, paste( Indices[a,(c('i','j','k'))] ) )  )
+    badVoxels[[length(badVoxels)+1]] <- Indices[a,(c('i','j','k'))]
+    next;
+  }
+
+
 
 
   # get the summary of each model in a cute structure
