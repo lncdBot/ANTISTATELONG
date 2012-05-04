@@ -22,7 +22,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(10)
+registerDoMC(13)
 require(foreach)
 
 
@@ -116,7 +116,6 @@ perVoxelModelInfo   <-  data.frame(Indexnumber=NA_real_)
 btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 
 # list for voxels that lme fails to fit (singularities)
-badVoxels           <- list()
 
 # record number of vars for each model type
 sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3)
@@ -145,6 +144,10 @@ typelist <- list(
 for ( type in unlist(typelist) ) {  
      perVoxelModelInfo[,type] <- NA_real_ 
 }  
+# *ugly hack* get the two that were missed, add bad voxel column
+perVoxelModelInfo$age.var1    <- NA_real_ 
+perVoxelModelInfo$invAge.var1 <- NA_real_ 
+perVoxelModelInfo$badVoxel    <- NA_real_ 
 
 
 
@@ -156,8 +159,9 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # run 3 models
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
-LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 #for (vox in 1:NumVoxels){
+#LmerOutputPerVoxel <- foreach(vox=c(100:120,160:170), .combine='rbind') %dopar% {
+LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
 
@@ -198,10 +202,10 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   if(class(attempt) == "try-error") {
     print(   paste("   * incomplete model(s) for voxel ",vox, singleRow$i,singleRow$j, singleRow$k)) 
     # this is dangerous and stupid when doing loop in parallel?
-    badVoxels[[length(badVoxels)+1]] <- Indices[vox,(c('i','j','k'))]
+    #keep single row a list of nans
+    singleRow$badVoxel <- 1
     return(singleRow)
   }
-
 
   # get the summary of each model in a cute structure
   models <- list( list("ageSq" , summary(nlme4a3) ),
@@ -250,6 +254,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
      singleRow[nameIdxs] <-  vals[1:(len-1)]
   }
+
   singleRow  # this is the return value of foreach, put into LmerOutputPerVoxel
 }
 
