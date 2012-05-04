@@ -13,6 +13,16 @@
 #     * use doMC for parallization
 #        externalprt error with doSNOW
 
+############## get NiFTI from commandlike
+cmdargs = commandArgs(TRUE)
+niifile <- as.character(cmdargs[1])
+if(! file.exists(niifile)){
+ stop(paste("need file argument! the one provide '", niifile, "' doesn't exist!",sep=""))
+}
+
+# save output as "niifile-PAR" 
+RdataName <- paste( sub('.nii(.gz)?','',niifile), "-PAR",sep="") 
+
 ###############Load appropriate libraries############
 library(Rniftilib)
 library(nlme)
@@ -22,7 +32,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(13)
+registerDoMC(26)
 require(foreach)
 
 
@@ -62,9 +72,8 @@ Demographics$ID <- seq(1,312)
 
 
 ################# Read in subject data (4D) #################
-RdataName <- "AScorr-PAR" 
-DataBeta  <- nifti.image.read("AScorrBeta")   #Output will be 64x76x64x312
-DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
+DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x312
+#DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
 # niftis orientation converted from RAM --> LPI (hopefully)
@@ -104,7 +113,7 @@ NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
 DemogMRI             <- Demographics
 DemogMRI$Indexnumber <- NA_real_
 DemogMRI$Beta        <- NA_real_
-DemogMRI$Tstat       <- NA_real_
+#DemogMRI$Tstat       <- NA_real_
 
 
 ###### Set up giant output dataframe ####################
@@ -181,7 +190,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   #...Pull the data for each of the voxels that are within the mask
   # ie. get the Beta's for this voxel
   locDemInfo$Beta  <- DataBeta[ Indices$i[vox], Indices$j[vox], Indices$k[vox], ]
-  locDemInfo$Tstat <- DataTstat[Indices$i[vox], Indices$j[vox], Indices$k[vox], ]
+  #locDemInfo$Tstat <- DataTstat[Indices$i[vox], Indices$j[vox], Indices$k[vox], ]
     
   #@@@@@@@@@@@@@@@ Use nmle @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   c <- lmeControl(10001, 10001,opt="optim")  #You need to set this equal to something or it will disappear in thin air
