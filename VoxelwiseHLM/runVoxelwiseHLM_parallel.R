@@ -14,7 +14,7 @@
 #        externalprt error with doSNOW
 
 ############## get NiFTI from commandlike
-cmdargs = commandArgs(TRUE)
+cmdargs <- commandArgs(TRUE)
 niifile <- as.character(cmdargs[1])
 if(! file.exists(niifile)){
  stop(paste("need file argument! the one provide '", niifile, "' doesn't exist!",sep=""))
@@ -67,11 +67,11 @@ NumVisits      <- DataBeta$dim[4]                     # This would be 302
 #/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 # 10124	060803163400	12.97741273100616	1
 #Demographics        <- read.table("listage.Err.txt")
-#names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
+#names(Demographics) <- c("LunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
-if(grep("err", niifile, ignore.case=TRUE) ) {
+if(grepl("err", niifile, ignore.case=TRUE)) {
    print("Removing dA1se3sd == NA")
    Demographics <- Demographics[ -which(is.na(Demo$dA10er3sd)), ]
 }
@@ -210,10 +210,10 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   
   # attempt to generate models
   attempt <- try({
-     nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | lunaID, data=locDemInfo)            # nlme1a0: no age
-     nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | lunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | lunaID, data=locDemInfo, control=c) # nlme3a2: ageC
-     nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | lunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
+     nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | LunaID, data=locDemInfo)            # nlme1a0: no age
+     nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
+     nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
+     nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
      #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
   })
 
