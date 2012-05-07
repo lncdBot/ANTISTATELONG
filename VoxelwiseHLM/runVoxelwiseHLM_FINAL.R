@@ -284,9 +284,9 @@ for (a in 1:NumVoxels){
   ##Group 3a&b:      -     sig       -          -             -      -         -                  Sig devt change - inverse (not mutually exclusive)
   ##Group 4a&b:      -       -       -        sig             -      -         -                  Sig devt change - linear (not mutually exclusive)     
   ##Group 5a&b:      -       -       -          -             -      -       sig                  Sig devt change - quadratic (not mutually exclusive)
-  ##Group 6a&b:    pseudo-R2 is max for invage model
-  ##Group 7a&b:    pseudo-R2 is max for age model
-  ##Group 8a&b:    pseudo-R2 is max for agesq model
+  ##Group 6a&b:    AIC is min for invage model
+  ##Group 7a&b:    AIC is min for age model
+  ##Group 8a&b:    AIC is min for agesq model
   
   
   # attempt to generate models
