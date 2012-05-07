@@ -20,9 +20,9 @@ setwd("/Volumes/Governator/ANTISTATELONG/ROIs/Data")
 
 library(gdata)
 
-SubjData<-read.xls("SubjData.xls")
+SubjData<-read.xls("SubjData.xls", sheet=1)
 SubjData$LunaID <- factor(SubjData$LunaID)
-SubjData$SexIDwords <- factor(SubjData$SexID, levels=c(1,2), labels=c("Male", "Female"))
+SubjData$SexWds <- factor(SubjData$SexID, levels=c(1,2), labels=c("Male", "Female"))
 SubjData$sexNum <- (SubjData$SexID + 2)%%2                      #M = 1 F = 0
   
 #... Calculate other sex codes
@@ -71,7 +71,12 @@ for (roi in c("dACC_10weighted_4Errs", "dACC_10weighted", "dlPFC_Lweighted", "dl
 #assign(paste("custom", roi, sep=""), linked) #The same as the line above
 #linked <- get(paste("custom", roi, sep="")) #To get object
 
+#Add the Error Rates
 BehavData <- read.table("BehavData.txt", header=TRUE)
+linked <- merge(linked, subset(BehavData, select=-LunaID), by="BircID", all.x = TRUE, all.y = TRUE)
+
+#Add the Latencies
+Latencies <- read.table("AllBehavData_AntiState_BIRC_AS_2012.02.17_Sheet1reorg_abb.txt", header=TRUE)
 linked <- merge(linked, subset(BehavData, select=-LunaID), by="BircID", all.x = TRUE, all.y = TRUE)
 
 #write.table(linked, file="linkedROIs_20120406.txt", append=FALSE, row.names=FALSE, col.names=TRUE)

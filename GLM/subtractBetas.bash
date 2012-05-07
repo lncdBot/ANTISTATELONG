@@ -25,7 +25,11 @@ for subjdir in $( ls ${rootdir} ); do
 		for visitdir in $( ls ${rootdir}/${subjdir} ); do
 		
 			if [[ ${visitdir} =~ ^[0-9]{12} ]] && [ -d ${rootdir}/${subjdir}/${visitdir} ]; then 
-				
+			
+			if 
+			[[ ${subjdir}/${visitdir} == 10300/090617130615 ]] || \
+			[[ ${subjdir}/${visitdir} == 10215/080126114813 ]];then
+			
 				pwd
 				
 				cd ${rootdir}/${subjdir}/${visitdir}/analysis
@@ -48,6 +52,7 @@ for subjdir in $( ls ${rootdir} ); do
 				-overwrite
 				
 				cd ${rootdir}
+			fi
 			fi
 			
 		done

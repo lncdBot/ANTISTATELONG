@@ -2,11 +2,15 @@
 
 #File: glm_hrf.bash
 #Dir:  /Volumes/Governator/ANTISTATELONG/GLM
+
 #Author: Sarah Ordaz
 #Date: 	Feb 24, 2012 asked Aarthi
 #		March 6, 2012 ran it (stopped after 10136/0607...)
 #		March 7, 2012 ran it
 #       April 29, 2012 ran it to fix 10138/060717162450, who had a 
+#       May 4, 2012 ran it 10173/051128162845
+
+#WARNING!  Make sure to run subtractBetas.bash after this!!
 
 #Qs I asked Aarthi:
 #Is rot1,rot2,rot3=x,y,z? doesn't matter
@@ -39,8 +43,10 @@ for subjdir in $( ls ${rootdir} ); do
 		
 			if [ -d ${subjdir}/${visitdir} ] && [[ ${visitdir} =~ ^[0-9]{12} ]]; then
 
-			if 
-			[[ ${subjdir}/${visitdir} == 10138/060717162450 ]]; then
+			if
+			[[ ${subjdir}/${visitdir} == 10173/051128162845 ]]; then
+			 
+			#[[ ${subjdir}/${visitdir} == 10138/060717162450 ]]; then
 			
 			#[[ ${subjdir}/${visitdir} == 10344/101241545011 ]] || \
 			#[[ ${subjdir}/${visitdir} == 10241/080327161039 ]] || \
@@ -144,6 +150,7 @@ for subjdir in $( ls ${rootdir} ); do
                                 # and run, logging output to REML.log in analysis
                                 chmod +x $newREML
                                 $newREML 2>&1 | tee ${rootdir}/${subjdir}/${visitdir}/analysis/REML.log &
+			
 
 			fi
 			fi
