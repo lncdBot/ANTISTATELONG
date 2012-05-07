@@ -39,9 +39,34 @@ require(foreach)
 ################Generate demographics data ("DemographicsPerVoxelVisit")#################
 print("building inputs")
 
+
+
+
+################# Read in subject data (4D) #################
+DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x312
+#DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
+
+#... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
+# niftis orientation converted from RAM --> LPI (hopefully)
+Mask <- nifti.image.read("inputnii/mask_copy")        #Output will be (64x76x64)
+
+#... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
+Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
+                                                      #   I didn't use this because it flattened the data 
+                                                      #   in a manner that made it less interpretable
+Indexijk       <- which(Mask[,,] > 0, arr.ind=TRUE)   # This creates more interpretable index
+IndicesMatrix  <- cbind(Indexnumber, Indexijk)        # Matrix with both types of index information
+Indices        <- as.data.frame(IndicesMatrix)
+names(Indices) <- c("Indexnumber","i", "j", "k")      # make a data frame and label what column is what
+
+NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
+NumVisits      <- DataBeta$dim[4]                         # This would be 312
+
+#### Demographic info
+
 #/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 # 10124	060803163400	12.97741273100616	1
-Demographics        <- read.table("listage.txt")
+Demographics        <- read.table("listage.Err.txt")
 names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 
 #... Calculate other sex codes
@@ -67,30 +92,7 @@ Demographics$invageC <- Demographics$invage - invMeanAge
 
 # set ID
 Demographics$ID <- NA_integer_
-Demographics$ID <- seq(1,312)
-
-
-
-################# Read in subject data (4D) #################
-DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x312
-#DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
-
-#... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
-# niftis orientation converted from RAM --> LPI (hopefully)
-Mask <- nifti.image.read("mask_copy")        #Output will be (64x76x64)
-
-#... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
-Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
-                                                      #   I didn't use this because it flattened the data 
-                                                      #   in a manner that made it less interpretable
-Indexijk       <- which(Mask[,,] > 0, arr.ind=TRUE)   # This creates more interpretable index
-IndicesMatrix  <- cbind(Indexnumber, Indexijk)        # Matrix with both types of index information
-Indices        <- as.data.frame(IndicesMatrix)
-names(Indices) <- c("Indexnumber","i", "j", "k")      # make a data frame and label what column is what
-
-NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
-#NumVisits <- DataBeta$dim[4]                         # This would be 312
-
+Demographics$ID <- seq(1,NumVisits)
 #^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
 # pre-allocate
 # Indices <- data.frame( Indexnumber=rep(NA_real_,3), 

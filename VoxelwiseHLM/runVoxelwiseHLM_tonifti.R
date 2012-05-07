@@ -1,4 +1,6 @@
 ##############Reconstruct sparse storage as full cube###########################
+#
+# first arugment is Rdata file containing LmerOutputPerVoxel
 
 # Switch to oro.nifti
 library(oro.nifti)
@@ -8,13 +10,16 @@ cmdargs = commandArgs(TRUE)
  # load LmerOutputPerVoxel
 tryCatch(
   load(as.character(cmdargs[1])), 
-  error = function(e) {print("provide Rdata containing LmerOutputPerVoxel")}
-  )
+  error = function(e) {stop("provide Rdata containing LmerOutputPerVoxel")}
+)
+
+# get name from R data file
+ImageName <- paste( sub('(-PAR.*)?.Rdata','',cmdargs[1]),sep="") 
 
 # make an array of 0's voxels down and results across (voxResults is number of stats .. num of bricks)
 #
 
-NumBricks <- 8
+NumBricks <- dim(LmerOutputPerVoxel)[2] - 4 - 1  # don't care about the first 4 (index) , or last 1 (bad voxel)
 
 #Convert into array because I guess it has to be in this format
 #Mask <- nifti.image.read("mask_copy")  #Output will be three values (64x76x64)
@@ -57,20 +62,28 @@ results <- array(0, c(64,76,64, NumBricks))
 #
 ##insert results into 4d array
 #results[maskIndicesMod] <- as.matrix(LmerOutputPerVoxel[,5:(NumBricks+5)])
-
-MaskIndices <- LmerOutputPerVoxel[,2:4] # i j k
+goodVoxels  <- which(is.na(LmerOutputPerVoxel[,"badVoxel"]))
+MaskIndices <- LmerOutputPerVoxel[goodVoxels,2:4] # i j k
+#results[(MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),] <- LmerOutputPerVoxel[,5:(4+NumBricks)]
 for (b in 1:NumBricks) {
                 # i                 j               k         "t"
- results[cbind(MaskIndices[,1]+1,MaskIndices[,2]+1,MaskIndices[,3]+1,b)] <- LmerOutputPerVoxel[,(4+b)]
+ pos <- cbind((MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),b)
+ results[pos] <- LmerOutputPerVoxel[goodVoxels,(4+b)]
 }
 
+warnings()
 ######################Write results in AFNI format#####################
 #SO: one optionnifti.image.write(results)
 
 #numsubjects <- length(unique(voxcast$num_id))
+subBrickNames <- paste(colnames(LmerOutputPerVoxel[5:(4+NumBricks)]), collapse="~")
+# e.g. was "AIC~Deviance~BInt~BSlope~BIntSE~BSlopeSE~BIntT~BSlopeT~varSigma"
+
+print(ImageName)
+print(subBrickNames)
 
 AFNIout <- new("afni", results, 
-              IDCODE_STRING="AS_LMER",
+              IDCODE_STRING=ImageName,
               BYTEORDER_STRING="LSB_FIRST",
               TEMPLATE_SPACE="MNI",
               ORIENT_SPECIFIC=as.integer(c(1,2,4)), #LPI
@@ -83,10 +96,8 @@ AFNIout <- new("afni", results,
               DELTA=c(-3, -3, 3),
               ORIGIN=c(94.5, 130.5, -76.5),
               BRICK_TYPES=rep(3L, NumBricks), #float
-              BRICK_LABS=paste(colnames(LmerOutputPerVoxel[5:(4+NumBricks)]), collapse="~")
+              BRICK_LABS=subBrickNames
               )
-                         #was "SDCorr~SDT~SDp~RTCorr~RTT~RTp~AgeCorr~AgeT~Agep",
-                         #now  "AIC~Deviance~BInt~BSlope~BIntSE~BSlopeSE~BIntT~BSlopeT~varSigma"
 #ORIENT_SPECIFIC = 
 #Three integer codes describing the spatial orientation
 #The possible codes are:
@@ -115,7 +126,9 @@ AFNIout <- new("afni", results,
               #)
 
 
-writeAFNI(AFNIout, paste("AS_LMER_","error" ,"+tlrc", sep=""), verbose=TRUE)
+writeAFNI(AFNIout, paste(ImageName,"+tlrc",sep=""), verbose=TRUE)
+
+warnings()
 
 rm(AFNIout, results)
 gc()
