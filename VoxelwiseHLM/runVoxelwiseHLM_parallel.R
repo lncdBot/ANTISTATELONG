@@ -74,7 +74,7 @@ Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",he
 ## remove dA10se3sd == NA if using ASerror 
 if(grepl("err", niifile, ignore.case=TRUE)) {
    print("Removing dA1se3sd == NA")
-   Demographics <- Demographics[ -which(is.na(Demo$dA10er3sd)), ]
+   Demographics <- Demographics[ -which(is.na(Demographics$dA10er3sd)), ]
 }
 
 ## included now
