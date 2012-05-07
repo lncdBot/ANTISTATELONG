@@ -1,3 +1,4 @@
+#!/usr/bin/Rscript
 #Author: Sarah Ordaz
 #Date:   April 23, 2012
 #Mod :   May   03, 2012 (WF)
@@ -21,7 +22,7 @@ if(! file.exists(niifile)){
 }
 
 # save output as "niifile-PAR" 
-RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',niifile), "-PAR",sep="") 
+RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "-PAR",sep="") 
 
 ###############Load appropriate libraries############
 library(Rniftilib)
@@ -32,7 +33,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(26)
+registerDoMC(13) #registerDoMC(26)
 require(foreach)
 
 
@@ -214,6 +215,9 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
      nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
      nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
+     nlme5a1  <- lme(Beta ~ invageC + sex55 + sex55:invageC,   random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
+     nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:invageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
+     nlme5a3  <- lme(Beta ~ ageC + ageCsq + sex55 + sex55:invageC, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
      #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
   })
 
@@ -227,10 +231,14 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   }
 
   # get the summary of each model in a cute structure
-  models <- list( list("ageSq" , summary(nlme4a3) ),
-                  list("age"   , summary(nlme3a2) ),
-                  list("invAge", summary(nlme3a1) ),
-                  list("null"  , summary(nlme1a0) )  )
+  models <- list( 
+                  list("null"  ,    summary(nlme1a0) ),
+                  list("invAge",    summary(nlme3a1) ),
+                  list("age"   ,    summary(nlme3a2) ),
+                  list("ageSq" ,    summary(nlme4a3) ),
+                  list("invAgeSex", summary(nlme5a1) ),
+                  list("agesex",    summary(nlme5a1) ),
+                  list("ageSqSex",  summary(nlme5a1) ) )
 
   # and while we're here, get the sigma^2 of null
   nullSigma2 <- models[[4]][[2]]$sigma^2
@@ -238,7 +246,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
   # for each type and it's index (p->5, t->4, b->1)
   #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
-  for ( m in models) {
+  for ( m in models ) {
      mName <- m[[1]] # model name
      mSumm <- m[[2]] # model summary
 
