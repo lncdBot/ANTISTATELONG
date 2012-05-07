@@ -11,7 +11,8 @@
 #AStype="ASerrorCorr"
 
 #for AStype in "ASerrorCorr" "AScorr"; do
-for AStype in  "AScorr"; do
+#for AStype in  "AScorr"; do
+for AStype in  "ASerrorCorr"; do
    # for each of the subbricks desired
    #for subb in "${AStype}#0_Coef" "${AStype}#0_Tstat"; do
    for subb in "${AStype}#0_Coef"; do
@@ -27,7 +28,7 @@ for AStype in  "AScorr"; do
       3dTcat -overwrite -prefix $outname \
             $( 
              # read in from the data file
-             awk '(NR>1){print $2"/*"$1, $80}' Data302_9to26_20120504_copy.dat |
+             awk -F"\t" '(NR>1){print $2"/*"$1, $80}' Data302_9to26_20120504_copy.dat |
               while read path dA10se3sd; do
                  # skip errors > 3std devs from mean in ROI
                  [[ $AStype == "ASerrorCorr" && -z "$dA10se3sd" ]] && echo skipping $path 1>&2 && continue
