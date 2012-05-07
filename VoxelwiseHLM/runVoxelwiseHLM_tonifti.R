@@ -1,3 +1,4 @@
+#!/usr/bin/Rscript
 ##############Reconstruct sparse storage as full cube###########################
 #
 # first arugment is Rdata file containing LmerOutputPerVoxel
