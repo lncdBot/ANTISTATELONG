@@ -21,7 +21,7 @@ if(! file.exists(niifile)){
 }
 
 # save output as "niifile-PAR" 
-RdataName <- paste( sub('.nii(.gz)?','',niifile), "-PAR",sep="") 
+RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',niifile), "-PAR",sep="") 
 
 ###############Load appropriate libraries############
 library(Rniftilib)
@@ -43,8 +43,8 @@ print("building inputs")
 
 
 ################# Read in subject data (4D) #################
-DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x312
-#DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x312
+DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x302
+#DataTstat <- nifti.image.read("AScorrTstat")  #Output will be 64x76x64x302
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
 # niftis orientation converted from RAM --> LPI (hopefully)
@@ -60,35 +60,43 @@ Indices        <- as.data.frame(IndicesMatrix)
 names(Indices) <- c("Indexnumber","i", "j", "k")      # make a data frame and label what column is what
 
 NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
-NumVisits      <- DataBeta$dim[4]                         # This would be 312
+NumVisits      <- DataBeta$dim[4]                     # This would be 302
 
 #### Demographic info
 
 #/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 # 10124	060803163400	12.97741273100616	1
-Demographics        <- read.table("listage.Err.txt")
-names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
+#Demographics        <- read.table("listage.Err.txt")
+#names(Demographics) <- c("lunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
+Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",header=TRUE)
 
+## remove dA10se3sd == NA if using ASerror 
+if(grep("err", niifile, ignore.case=TRUE) ) {
+   print("Removing dA1se3sd == NA")
+   Demographics <- Demographics[ -which(is.na(Demo$dA10er3sd)), ]
+}
+
+## included now
 #... Calculate other sex codes
-Demographics$sex55   <- NA_integer_              # Add column for M = -0.5  F = 0.5
-Demographics$sexMref <- NA_integer_              # Add column for M = 0     F = 1
-Demographics$sex55   <- Demographics$sex -0.5
-Demographics$sexMref <- abs(Demographics$sex - 1)
-
+#Demographics$sex55   <- NA_integer_              # Add column for M = -0.5  F = 0.5
+#Demographics$sexMref <- NA_integer_              # Add column for M = 0     F = 1
+#Demographics$sex55   <- Demographics$sex -0.5
+#Demographics$sexMref <- abs(Demographics$sex - 1)
+#
 #... Calculate other age variables
-Demographics$invage  <- NA_integer_
-Demographics$invageC <- NA_integer_
-Demographics$ageC    <- NA_integer_
-Demographics$ageCsq  <- NA_integer_
-
-#... Calculate ageC, ageCsq, invageC
-meanAge      <- mean(Demographics$age)   #For 312, this is 16.7254959035428
-invMeanAge   <- 1/meanAge             #For 312, this is 0.05978896
-
-Demographics$ageC    <- Demographics$age - mean(Demographics$age)
-Demographics$ageCsq  <- Demographics$ageC * Demographics$ageC
-Demographics$invage  <- 1/Demographics$age
-Demographics$invageC <- Demographics$invage - invMeanAge
+#Demographics$invage  <- NA_integer_
+#Demographics$invageC <- NA_integer_
+#Demographics$ageC    <- NA_integer_
+#Demographics$ageCsq  <- NA_integer_
+#
+##... Calculate ageC, ageCsq, invageC
+#meanAge      <- mean(Demographics$age)   #For 302, this is 16.7254959035428
+#invMeanAge   <- 1/meanAge             #For 302, this is 0.05978896
+#
+#Demographics$ageC    <- Demographics$age - mean(Demographics$age)
+#Demographics$ageCsq  <- Demographics$ageC * Demographics$ageC
+#Demographics$invage  <- 1/Demographics$age
+#Demographics$invageC <- Demographics$invage - invMeanAge
 
 # set ID
 Demographics$ID <- NA_integer_
@@ -109,9 +117,9 @@ Demographics$ID <- seq(1,NumVisits)
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-################ Generate data frame ("DemogMRI") that's 312 rows long ############################
+################ Generate data frame ("DemogMRI") that's 302 rows long ############################
 
-#...Set up "DemogMRI" matrix = Demographics matrix + columns for MRI data (312 rows long) 
+#...Set up "DemogMRI" matrix = Demographics matrix + columns for MRI data (302 rows long) 
 DemogMRI             <- Demographics
 DemogMRI$Indexnumber <- NA_real_
 DemogMRI$Beta        <- NA_real_
@@ -166,7 +174,7 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 
 ################ For each voxel (67,000+), generate a file AND run HLM ############################
 # cp in indices to LmerOutputPerVoxel
-# rewrite DemogMRI Beta and Tstate of each visit for current voxel (each pixel has 312 Betas/Tstats)
+# rewrite DemogMRI Beta and Tstate of each visit for current voxel (each pixel has 302 Betas/Tstats)
 # run 3 models
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
