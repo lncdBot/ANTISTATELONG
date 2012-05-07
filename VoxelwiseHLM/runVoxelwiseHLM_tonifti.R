@@ -5,17 +5,19 @@
 # Switch to oro.nifti
 library(oro.nifti)
 library(pracma)
-cmdargs = commandArgs(TRUE)
+cmdargs   <- commandArgs(TRUE)
+RdataFile <- cmdargs[1]
 #load("lmr2.RData") # load LmerOutputPerVoxel
  # load LmerOutputPerVoxel
 tryCatch(
-  load(as.character(cmdargs[1])), 
+  load(as.character(RdataFile)), 
   error = function(e) {stop("provide Rdata containing LmerOutputPerVoxel")}
 )
 
 # get name from R data file
-ImageName <- paste( sub('(-PAR.*)?.Rdata','',cmdargs[1]),sep="") 
+ImageName <- paste( sub('(-PAR.*)?.RData','',RdataFile),sep="") 
 
+print(paste( "reading", RdataFile, "; saving to ",ImageName))
 # make an array of 0's voxels down and results across (voxResults is number of stats .. num of bricks)
 #
 
@@ -67,7 +69,10 @@ MaskIndices <- LmerOutputPerVoxel[goodVoxels,2:4] # i j k
 #results[(MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),] <- LmerOutputPerVoxel[,5:(4+NumBricks)]
 for (b in 1:NumBricks) {
                 # i                 j               k         "t"
- pos <- cbind((MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),b)
+ #pos <- cbind((MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),b)
+ # *****
+ # i j k are all 1 less than position read in?? weird index issue
+ pos <- cbind((MaskIndices[,1]),(MaskIndices[,2]),(MaskIndices[,3]),b)
  results[pos] <- LmerOutputPerVoxel[goodVoxels,(4+b)]
 }
 
@@ -79,8 +84,6 @@ warnings()
 subBrickNames <- paste(colnames(LmerOutputPerVoxel[5:(4+NumBricks)]), collapse="~")
 # e.g. was "AIC~Deviance~BInt~BSlope~BIntSE~BSlopeSE~BIntT~BSlopeT~varSigma"
 
-print(ImageName)
-print(subBrickNames)
 
 AFNIout <- new("afni", results, 
               IDCODE_STRING=ImageName,
@@ -126,7 +129,7 @@ AFNIout <- new("afni", results,
               #)
 
 
-writeAFNI(AFNIout, paste(ImageName,"+tlrc",sep=""), verbose=TRUE)
+writeAFNI(AFNIout, paste("HLMimages/",ImageName,"+tlrc",sep=""), verbose=TRUE)
 
 warnings()
 
