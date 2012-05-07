@@ -1,3 +1,20 @@
+0. need Data302_9to26_20120504_copy.dat and inputnii/mask_copy.nii
+1. run concat_REMLStats_Coef_Tstat.bash 
+    * Tcat Coef based on visits in Data..._copy.dat (skip 3std devs from ROI if no error)
+    * for AScorr and ASerrorCorr
+    * output's niis to inputnii/
+2. runVoxelwiseHLM_parallel.R 
+   * e.g. Rscript runVoxelwiseHLM_parallel.R inputnii/AScorr-Coef.nii
+   * should copy inputnii to gromit and run there
+   * creates Rdata files (should copy back to arnold)
+
+3. runVoxelwiseHLM_tonifti.R  
+   * e.g.
+   * create output head/brick in HLMimages/
+
+4. sort: 
+
+
 a0: no age term modeled
 a1: invageC model
 a2: ageC model
