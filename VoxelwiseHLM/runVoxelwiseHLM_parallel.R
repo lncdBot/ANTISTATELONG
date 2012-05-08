@@ -218,7 +218,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
      nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
      nlme5a1  <- lme(Beta ~ invageC + sex55 + sex55:invageC,   random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:invageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
+     nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:ageC,         random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
      nlme5a3  <- lme(Beta ~ ageC + ageCsq + sex55 + sex55:invageC, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
      #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
   })

@@ -277,7 +277,7 @@ for (a in 1:NumVoxels){
   
   ######Part 1: Pick the model on the basis of whether there's a sig devt effect, significant Betas, R2 vs base model, sign of Beta
   #Key: "-" means we don't care what it is'
-  #            invageB0, invageB1,  ageB0, invageB1,    agesqB0, agesqB1, agesqB2   ValueageB0  ValueageB1, ValueinvageB1, ValueagesqB2
+  #            invageB0, invageB1,  ageB0,   ageB1,    agesqB0, agesqB1, agesqB2   ValueageB0  ValueageB1, ValueinvageB1, ValueagesqB2
   ##Group 1:       n.s.    n.s.     n.s.      n.s.          n.s.    n.s.     n.s.                 No devt change and no brain activity in that region 
   ##Group 2a:      sig     n.s.     sig       n.s.            -     n.s.     n.s.        pos      No devt change, but positive intercept 
   ##Group 2b:      sig     n.s.     sig       n.s.            -     n.s.     n.s.        neg      No devt change, but negative intercept

@@ -37,9 +37,9 @@ Group 2b:      sig     n.s.     sig       n.s.            -     n.s.     n.s.   
 Group 3a&b:      -     sig       -          -             -      -         -                  Sig devt change - inverse (not mutually exclusive)
 Group 4a&b:      -       -       -        sig             -      -         -                  Sig devt change - linear (not mutually exclusive)     
 Group 5a&b:      -       -       -          -             -      -       sig                  Sig devt change - quadratic (not mutually exclusive)
-Group 6a&b:    pseudo-R2 is max for invage model
-Group 7a&b:    pseudo-R2 is max for age model
-Group 8a&b:    pseudo-R2 is max for agesq model
+Group 6a&b:    AIC is max for invage model
+Group 7a&b:    AIC is max for age model
+Group 8a&b:    AIC is max for agesq model
   
 
 

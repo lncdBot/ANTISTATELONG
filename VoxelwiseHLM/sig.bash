@@ -2,7 +2,21 @@
 
 
 img="HLMimages/AScorrBeta.nii+tlrc"
-sig=.005
+sig=.001
+
+while getopts :r:l:p:o:q:t: switch; do
+case $switch in
+   i) img="$OPTARG" ;;        # LOG FILE
+   p) sig="$OPTARG" ;;        # Process name
+   #*) sed -n // ;;               
+esac
+done
+
+
+dir="sig/$(basename $img +tlrc)$sig"
+[ -d $dir ] || mkdir $dir
+
+
 # always in this order
 # 3dcalc -a $img'[age.p0]'    -b $img'[age.p1]'                          \
 #        -c $img'[invAge.p0]' -d $img'[invAge.p1]'                       \
@@ -16,11 +30,14 @@ sig=.005
 #          invageB0 invageB1 ageB0 invageB1 agesqB0 agesqB1 agesqB2  v_ageB0  v_ageB1 v_invageB1 v_agesqB2
 # Group 1:   n.s.    n.s.    n.s.    n.s.     n.s.    n.s.     n.s.                                        | No devt change or activity
 
-[ -r "sig/1-notSig+tlrc.BRIK" ] ||                                      \
+name="$dir/1-notSig"
+[ -r "$name+tlrc.BRIK" ] ||                                      \
  3dcalc -a $img'[age.p0]'    -b $img'[age.p1]'                          \
         -c $img'[invAge.p0]' -d $img'[invAge.p1]'                       \
         -e $img'[ageSq.p0]'  -f $img'[ageSq.p1]' -g $img'[ageSq.p2]'    \
-        -expr "ispositive(min(a,min(b,min(c,min(d,min(e,min(f,g)))))) - $sig)" -prefix 'sig/1-notSig'
+        -expr "ispositive(
+                 min(a,min(b,min(c,min(d,min(e,min(f,g)))))) - $sig  )" \
+        -prefix $name -overwrite
        # if the smallest value minus what is sig is still positive, it's not significant
 
 
@@ -36,7 +53,8 @@ sig=.005
 ######################
 
 # both invAge and Age pos intercepts (insig slopes)
-[ -r "sig/2a-posIntc+tlrc.BRIK" ] ||                                 \
+name="$dir/2a-posIntc"
+[ -r "$name+tlrc.BRIK" ] ||                                 \
  3dcalc -a $img'[age.p0]'    -b $img'[age.p1]'                          \
         -c $img'[invAge.p0]' -d $img'[invAge.p1]'                       \
                              -f $img'[ageSq.p1]' -g $img'[ageSq.p2]'    \
@@ -46,10 +64,11 @@ sig=.005
                isnegative(a - $sig),
                isnegative(c - $sig),
                ispositive(h),
-               ispositive(j) )" -prefix 'sig/2a-posIntc' -overwrite
+               ispositive(j) )" -prefix $name -overwrite
 
 # both invAge and Age neg intercepts (insig slopes)
-[ -r "sig/2b-negIntc+tlrc.BRIK" ] ||                                 \
+name="$dir/2a-negIntc"
+[ -r "$name+tlrc.BRIK" ] ||                                 \
  3dcalc -a $img'[age.p0]'    -b $img'[age.p1]'                          \
         -c $img'[invAge.p0]' -d $img'[invAge.p1]'                       \
                              -f $img'[ageSq.p1]' -g $img'[ageSq.p2]'    \
@@ -59,7 +78,7 @@ sig=.005
                isnegative(a - $sig),
                isnegative(c - $sig),
                isnegative(h),
-               isnegative(j) )" -prefix 'sig/2b-negIntc' -overwrite
+               isnegative(j) )" -prefix $name -overwrite
 
 
 
@@ -68,8 +87,15 @@ sig=.005
 #     invageB0 invageB1  ageB0 ageB1  agesqB0 agesqB1 agesqB2 
 #3a&b:   -       -        -     sig      -      -         -      | Sig devt change - linear (not mutually exclusive)     
 ######################
+#all
+name="$dir/3a-ageSigSlope-all"
+#[ -r "$name+tlrc.BRIK" ] || \
+ 3dcalc                      -b $img'[age.p1]'                          \
+        -expr "b*isnegative( b - $sig )"                    \
+        -prefix $name -overwrite
+
 # age pos sig slop
-name="sig/3a-ageSigSlope-pos"
+name="$dir/3a-ageSigSlope-pos"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                      -b $img'[age.p1]'                          \
                              -i $img'[age.b1]'                          \
@@ -77,7 +103,7 @@ name="sig/3a-ageSigSlope-pos"
         -prefix $name -overwrite
 
 # age neg sig slope
-name="sig/3b-ageSigSlope-neg"
+name="$dir/3b-ageSigSlope-neg"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                      -b $img'[age.p1]'                          \
                              -i $img'[age.b1]'                          \
@@ -92,7 +118,7 @@ name="sig/3b-ageSigSlope-neg"
 ######################
 
 # inv age pos sig slope
-name="sig/4a-invAgeSigSlope-pos"
+name="$dir/4a-invAgeSigSlope-pos"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                                                                 \
                              -d $img'[invAge.p1]'                       \
@@ -102,7 +128,7 @@ name="sig/4a-invAgeSigSlope-pos"
 
 
 # inv age neg sig slope
-name="sig/4a-invAgeSigSlope-neg"
+name="$dir/4a-invAgeSigSlope-neg"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                                                                 \
                              -d $img'[invAge.p1]'                       \
@@ -117,7 +143,7 @@ name="sig/4a-invAgeSigSlope-neg"
 ######################
 
 # inv age pos sig slope
-name="sig/5a-ageSqSig-pos"
+name="$dir/5a-ageSqSig-pos"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                                                                 \
                                                  -g $img'[ageSq.p2]'    \
@@ -125,7 +151,7 @@ name="sig/5a-ageSqSig-pos"
         -expr "isnegative( g - $sig )*ispositive(n) "                   \
         -prefix $name -overwrite
 
-name="sig/5b-ageSqSig-neg"
+name="$dir/5b-ageSqSig-neg"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc                                                                 \
                                                  -g $img'[ageSq.p2]'    \
@@ -136,8 +162,10 @@ name="sig/5b-ageSqSig-neg"
 #Group 6a&b:    AIC is max for invage model
 #Group 7a&b:    AIC is max for age model
 #Group 8a&b:    AIC is max for agesq model
-name="sig/6-7-8-AICbestForAgeInvSq"
+name="$dir/6-7-8-AICbestForAgeInvSq"
 [ -r "$name+tlrc.BRIK" ] || \
  3dcalc -a $img'[age.AIC]' -b $img'[invAge.AIC]' -c $img'[ageSq.AIC]'   \
-        -expr 'argmax(a,b,c)' -prefix $name -overwrite
+        -expr 'argmax(-1*a,-1*b,-1*c)' -prefix $name -overwrite
 
+# 3dcalc -a $img'[age.Deviance]' -b $img'[invAge.Deviance]' -c $img'[ageSq.Deviance]'   \
+        #-expr 'argmax(-1*a,-1*b,-1*c)' -prefix 678-Dev -overwrite
