@@ -138,7 +138,8 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 # list for voxels that lme fails to fit (singularities)
 
 # record number of vars for each model type, need predefined or rbind "simpleError"
-sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3,ageSex=4,invAgeSex=4,ageSqSex=4 )
+#sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3,ageSex=4,invAgeSex=4,ageSqSex=4 )
+sizes               <- data.frame(invAge=2)
 
 ############  All the info we want ####################3
 # create a column for each "type" of output we're interested in
@@ -152,7 +153,8 @@ typelist <- list(
   #    here s is the size, n is the model name
   sapply( names(sizes), function(n) paste( n,                                       # prepend model. to everything
     c(
-     "AIC", "Deviance", "R2","Residual",                                            #  list of generic stats in every model
+     #"AIC", "Deviance", "R2","Residual",                                           #  list of generic stats in every model
+     "AIC", "Deviance", "Residual",                                                 #  list of generic stats in every model
      paste( 'var',  0:(if (sizes[[n]] > 1) sizes[[n]]-2 else 0),  sep=""),          #  list of all possibe var0..var1
      sapply(0:(sizes[[n]]-1), function (s) paste( cbind("b","p","t"), s, sep=""))   #  create matrix of all p0..p2,t0..t2,b0..b2
     )
@@ -165,10 +167,10 @@ for ( type in unlist(typelist) ) {
      perVoxelModelInfo[,type] <- NA_real_ 
 }  
 # *ugly hack* get the two that were missed, add bad voxel column
-perVoxelModelInfo$age.var1       <- NA_real_ 
+#perVoxelModelInfo$age.var1       <- NA_real_ 
 perVoxelModelInfo$invSex.var1    <- NA_real_ 
 perVoxelModelInfo$invAge.var1    <- NA_real_ 
-perVoxelModelInfo$invAgeSex.var1 <- NA_real_ 
+#perVoxelModelInfo$invAgeSex.var1 <- NA_real_ 
 perVoxelModelInfo$badVoxel       <- NA_real_ 
 
 
@@ -213,13 +215,13 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   
   # attempt to generate models
   attempt <- try({
-     nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | LunaID, data=locDemInfo)            # nlme1a0: no age
+     #nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | LunaID, data=locDemInfo)            # nlme1a0: no age
      nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
-     nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
-     nlme5a1  <- lme(Beta ~ invageC + sex55 + sex55:invageC,   random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:ageC,         random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
-     nlme5a3  <- lme(Beta ~ ageC + ageCsq + sex55 + sex55:ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
+     #nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
+     #nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
+     #nlme5a1  <- lme(Beta ~ invageC + sex55 + sex55:invageC,   random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
+     #nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:ageC,         random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
+     #nlme5a3  <- lme(Beta ~ ageC + ageCsq + sex55 + sex55:ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
      #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
   })
 
@@ -234,17 +236,18 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
   # get the summary of each model in a cute structure
   models <- list( 
-                  list("null"  ,    summary(nlme1a0) ),
+     ##             list("null"  ,    summary(nlme1a0) ),
                   list("invAge",    summary(nlme3a1) ),
-                  list("age"   ,    summary(nlme3a2) ),
-                  list("ageSq" ,    summary(nlme4a3) ),
-                  list("invAgeSex", summary(nlme5a1) ),
-                  list("ageSex",    summary(nlme5a2) ),
-                  list("ageSqSex",  summary(nlme5a3) ) 
+     #             list("age"   ,    summary(nlme3a2) ),
+     #             list("ageSq" ,    summary(nlme4a3) ),
+     #             list("invAgeSex", summary(nlme5a1) ),
+     #             list("ageSex",    summary(nlme5a2) ),
+     #             list("ageSqSex",  summary(nlme5a3) ) 
                )
 
   # and while we're here, get the sigma^2 of null
-  nullSigma2 <- models[[4]][[2]]$sigma^2
+  # need null model to do this
+  #nullSigma2 <- models[[4]][[2]]$sigma^2
 
 
   # for each type and it's index (p->5, t->4, b->1)
@@ -268,8 +271,8 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      singleRow[paste(mName,"AIC",sep=".")]      <-  mSumm$AIC;
      singleRow[paste(mName,"Deviance",sep=".")] <-  mSumm$logLik*-2;
      
-     # pseudo R^2
-     singleRow[paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
+     # pseudo R^2 -- need null model
+     #singleRow[paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
 
 
      # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
@@ -291,5 +294,5 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
 
 print("saving output ")
-save.image(file=paste(RdataName, "lmr.RData", sep="_"))
+save.image(file=paste(RdataName, "lmr-invOnly.RData", sep="_"))
 #
