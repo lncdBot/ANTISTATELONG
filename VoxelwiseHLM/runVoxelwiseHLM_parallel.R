@@ -137,8 +137,8 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 
 # list for voxels that lme fails to fit (singularities)
 
-# record number of vars for each model type
-sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3)
+# record number of vars for each model type, need predefined or rbind "simpleError"
+sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3,ageSex=4,invAgeSex=4,ageSqSex=4 )
 
 ############  All the info we want ####################3
 # create a column for each "type" of output we're interested in
@@ -165,9 +165,11 @@ for ( type in unlist(typelist) ) {
      perVoxelModelInfo[,type] <- NA_real_ 
 }  
 # *ugly hack* get the two that were missed, add bad voxel column
-perVoxelModelInfo$age.var1    <- NA_real_ 
-perVoxelModelInfo$invAge.var1 <- NA_real_ 
-perVoxelModelInfo$badVoxel    <- NA_real_ 
+perVoxelModelInfo$age.var1       <- NA_real_ 
+perVoxelModelInfo$invSex.var1    <- NA_real_ 
+perVoxelModelInfo$invAge.var1    <- NA_real_ 
+perVoxelModelInfo$invAgeSex.var1 <- NA_real_ 
+perVoxelModelInfo$badVoxel       <- NA_real_ 
 
 
 
@@ -180,7 +182,7 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
 #for (vox in 1:NumVoxels){
-#LmerOutputPerVoxel <- foreach(vox=c(100:120,160:170), .combine='rbind') %dopar% {
+#LmerOutputPerVoxel <- foreach(vox=c(160:163), .combine='rbind') %do% {
 LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
@@ -237,8 +239,9 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
                   list("age"   ,    summary(nlme3a2) ),
                   list("ageSq" ,    summary(nlme4a3) ),
                   list("invAgeSex", summary(nlme5a1) ),
-                  list("agesex",    summary(nlme5a1) ),
-                  list("ageSqSex",  summary(nlme5a1) ) )
+                  list("ageSex",    summary(nlme5a1) ),
+                  list("ageSqSex",  summary(nlme5a1) ) 
+               )
 
   # and while we're here, get the sigma^2 of null
   nullSigma2 <- models[[4]][[2]]$sigma^2
@@ -282,7 +285,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
      singleRow[nameIdxs] <-  vals[1:(len-1)]
   }
 
-  singleRow  # this is the return value of foreach, put into LmerOutputPerVoxel
+  return(singleRow)  # this is the return value of foreach, put into LmerOutputPerVoxel
 }
 
 
