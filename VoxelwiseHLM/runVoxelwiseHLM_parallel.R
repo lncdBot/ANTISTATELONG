@@ -184,7 +184,7 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
 #for (vox in 1:NumVoxels){
-#LmerOutputPerVoxel <- foreach(vox=c(160:163), .combine='rbind') %do% {
+#LmerOutputPerVoxel <- foreach(vox=c(161:163), .combine='rbind') %do% {
 LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
@@ -227,7 +227,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
   # if there was an error (sigularity?)
   if(class(attempt) == "try-error") {
-    print(   paste("   * incomplete model(s) for voxel ",vox, singleRow$i,singleRow$j, singleRow$k)) 
+    print(   paste("   * ",format(Sys.time(), "%H:%M:%S"),"incomplete model(s) for voxel ",vox, singleRow$i,singleRow$j, singleRow$k)) 
     # this is dangerous and stupid when doing loop in parallel?
     #keep single row a list of nans
     singleRow$badVoxel <- 1
@@ -237,7 +237,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # get the summary of each model in a cute structure
   models <- list( 
      ##             list("null"  ,    summary(nlme1a0) ),
-                  list("invAge",    summary(nlme3a1) ),
+                  list("invAge",    summary(nlme3a1) )
      #             list("age"   ,    summary(nlme3a2) ),
      #             list("ageSq" ,    summary(nlme4a3) ),
      #             list("invAgeSex", summary(nlme5a1) ),
