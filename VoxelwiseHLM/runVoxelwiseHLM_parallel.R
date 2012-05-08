@@ -239,8 +239,8 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
                   list("age"   ,    summary(nlme3a2) ),
                   list("ageSq" ,    summary(nlme4a3) ),
                   list("invAgeSex", summary(nlme5a1) ),
-                  list("ageSex",    summary(nlme5a1) ),
-                  list("ageSqSex",  summary(nlme5a1) ) 
+                  list("ageSex",    summary(nlme5a2) ),
+                  list("ageSqSex",  summary(nlme5a3) ) 
                )
 
   # and while we're here, get the sigma^2 of null
