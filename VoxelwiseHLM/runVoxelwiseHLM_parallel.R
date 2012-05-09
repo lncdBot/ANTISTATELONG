@@ -164,8 +164,8 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
 #for (vox in 1:NumVoxels){
-LmerOutputPerVoxel <- foreach(vox=c(159:163), .combine='rbind') %do% {
-#LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
+#LmerOutputPerVoxel <- foreach(vox=c(159:163), .combine='rbind') %do% {
+LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
 
@@ -174,6 +174,7 @@ LmerOutputPerVoxel <- foreach(vox=c(159:163), .combine='rbind') %do% {
   
   # give output every once and awhile so we know it's working: "09:24:04 on voxel  10 loc  33 28 4"
   if( vox %% 100 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc ',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
+  if( vox  == NumVoxels )  print(paste(format(Sys.time(), "%H:%M:%S"), ' HLM for last voxel started!') )
   
   
   # set indeces 
@@ -300,5 +301,5 @@ LmerOutputPerVoxel <- foreach(vox=c(159:163), .combine='rbind') %do% {
 
 
 print("saving output ")
-save.image(file=paste(RdataName, "test-invSexIQ.RData", sep="_"))
+save.image(file=paste(RdataName, "invSexIQ.RData", sep="_"))
 #
