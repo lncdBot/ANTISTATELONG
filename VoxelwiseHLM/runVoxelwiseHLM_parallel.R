@@ -78,6 +78,7 @@ NumVisits      <- DataBeta$dim[4]                     # This would be 302
 Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
+# or ASerrMinAScorr
 if(grepl("err", niifile, ignore.case=TRUE)) {
    print("Removing dA1se3sd == NA")
    Demographics <- Demographics[ -which(is.na(Demographics$dA10er3sd)), ]
@@ -117,7 +118,7 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 #sizes    <- data.frame(invAgeSex=4, invAgeSexIQ=6, invAge=2, invAgeSlopeNull=2)
 #varsizes <- data.frame(invAgeSex=2, invAgeSexIQ=2, invAge=2, invAgeSlopeNull=1)
 
-############# MODELS ################3
+############# MODELS ################
 wantModels=c("invAge", "invAgeSex", "invAgeSexIQ","invAgeSlopeNull")
 
 # model formula and info is stored in models.csv
