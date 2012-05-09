@@ -16,7 +16,8 @@ tryCatch(
 )
 
 # get name from R data file
-ImageName <- paste( sub('(-PAR.*)?.RData','',RdataFile),sep="") 
+#ImageName <- paste( sub('(-PAR.*)?.RData','',RdataFile),sep="") 
+ImageName <- paste( sub('.RData','',basename(RdataFile)),sep="") 
 
 print(paste( "reading", RdataFile, "; saving to ",ImageName))
 # make an array of 0's voxels down and results across (voxResults is number of stats .. num of bricks)
@@ -29,44 +30,9 @@ NumBricks <- dim(LmerOutputPerVoxel)[2] - 4 - 1  # don't care about the first 4 
 #results <- array(0, c(Mask$dim, NumBricks))
 results <- array(0, c(64,76,64, NumBricks))
 
-#NewArray <- array(0, Mask$dim)     #Same as NewArray <- array(0, c(64,76,64))
-#NewArray <- array(0, c(1,3,1,NumBricks))
-#for (i in 1:NumVoxels){
-#  LmerOutputPerVoxel[]
-#}
-#NewArray[i,j,k,l] <- LmerOutputPerVoxel[1,2]
-
-#QQQ FIND OUT WHAT THIS MEANS - smap?
-# somewhere: smap <- subspatmaps[,col] 
-# subspatmaps: 3d ICA results?
-#
-#using single bracked [ results in many sublists with result.70$maskData etc.
-#Results <- array(0, c(smap[[1]]$sdim, ncol(voxResults)))
-#maskIndices <- smap[[1]]$maskIndices
-#icnum <- smap[[1]]$ic
-
-
-#tile maskIndices ncol(voxResults) times and add 4th dim col
-#pracma and repmat are Matlab commands
-#Matlab has the repmat function documented a lot more clearly
-
-#It will be slower to loop through and put each ijkl in it's proper spot.  
-#Below we create a list for each stat brik, and then loop thorugh and populate each
-#Above is the same as doing below. He did this because there is another repmat in the "matlab" library, but that gets confused
-#ncol is the number of stats you have (essentially the nubmer of bricks you will create)
-#this creates a list of 
-
-#### where to store values inside volume and time
-#MaskIndices <- LmerOutputPerVoxel[1,]
-#maskIndicesMod <- cbind(
-#                    repmat(maskIndices, NumBricks, 1),              # maskIndices for each brick (in one dim.)
-#                    rep(1:NumBricks, each=nrow(LmerOutputPerVoxel)) # 
-#                  )
-#
-##insert results into 4d array
-#results[maskIndicesMod] <- as.matrix(LmerOutputPerVoxel[,5:(NumBricks+5)])
 goodVoxels  <- which(is.na(LmerOutputPerVoxel[,"badVoxel"]))
 MaskIndices <- LmerOutputPerVoxel[goodVoxels,2:4] # i j k
+
 #results[(MaskIndices[,1]+1),(MaskIndices[,2]+1),(MaskIndices[,3]+1),] <- LmerOutputPerVoxel[,5:(4+NumBricks)]
 for (b in 1:NumBricks) {
                 # i                 j               k         "t"
