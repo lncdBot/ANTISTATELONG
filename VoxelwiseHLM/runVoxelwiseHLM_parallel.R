@@ -14,6 +14,12 @@
 #     * use doMC for parallization
 #        externalprt error with doSNOW
 
+# inputs
+#  nii.gz                             (betas values, provided as first argument)
+#  Data302_9to26_20120504_copy.dat    (demographic info -- e.g. ageC, IQ)
+#  models.csv                         (model info -- num{Var,BPT},mform, rform)
+#  inputnii/mask_copy                 (brain mask)
+
 ############## get NiFTI from commandlike
 cmdargs <- commandArgs(TRUE)
 niifile <- as.character(cmdargs[1])
@@ -21,8 +27,8 @@ if(! file.exists(niifile)){
  stop(paste("need file argument! the one provide '", niifile, "' doesn't exist!",sep=""))
 }
 
-# save output as "niifile-PAR" 
-RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "-PAR",sep="") 
+# where to save the output, remove .nii.gz
+RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "",sep="") 
 
 ###############Load appropriate libraries############
 library(Rniftilib)
@@ -33,7 +39,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(13) #registerDoMC(26)
+registerDoMC(25) #registerDoMC(26)
 require(foreach)
 
 
@@ -77,45 +83,13 @@ if(grepl("err", niifile, ignore.case=TRUE)) {
    Demographics <- Demographics[ -which(is.na(Demographics$dA10er3sd)), ]
 }
 
-## included now
-#... Calculate other sex codes
-#Demographics$sex55   <- NA_integer_              # Add column for M = -0.5  F = 0.5
-#Demographics$sexMref <- NA_integer_              # Add column for M = 0     F = 1
-#Demographics$sex55   <- Demographics$sex -0.5
-#Demographics$sexMref <- abs(Demographics$sex - 1)
-#
-#... Calculate other age variables
-#Demographics$invage  <- NA_integer_
-#Demographics$invageC <- NA_integer_
-#Demographics$ageC    <- NA_integer_
-#Demographics$ageCsq  <- NA_integer_
-#
-##... Calculate ageC, ageCsq, invageC
-#meanAge      <- mean(Demographics$age)   #For 302, this is 16.7254959035428
-#invMeanAge   <- 1/meanAge             #For 302, this is 0.05978896
-#
-#Demographics$ageC    <- Demographics$age - mean(Demographics$age)
-#Demographics$ageCsq  <- Demographics$ageC * Demographics$ageC
-#Demographics$invage  <- 1/Demographics$age
-#Demographics$invageC <- Demographics$invage - invMeanAge
 
-# set ID
-Demographics$ID <- NA_integer_
-Demographics$ID <- seq(1,NumVisits)
-#^^^^^^^^^^^^^^FAKE DATA (3 voxels)^^^^^^^^^^^^^^^^
-# pre-allocate
-# Indices <- data.frame( Indexnumber=rep(NA_real_,3), 
-#                        i=rep(NA_real_,3), 
-#                        j=rep(NA_real_,3), 
-#                        k=rep(NA_real_,3))
-# 
-# Indices$Indexnumber <- seq(300,302)
-# Indices$i <- sample(30:35,3)
-# Indices$j <- sample(29:32,3)
-# Indices$k <- sample(20:23,3)
-# NumVoxels <- 3
-# 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+### set additional demogrpahics (ID and IQ) ###
+Demographics$ID  <- NA_integer_
+Demographics$ID  <- seq(1,NumVisits)
+# NOTE: set NA IQs to the mean
+Demographics$IQ[c(which(is.na(Demographics$IQ)))] <- 113.48 
+Demographics$IQC <- Demographics$IQ - 113.48 
 
 
 ################ Generate data frame ("DemogMRI") that's 302 rows long ############################
@@ -138,25 +112,37 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 # list for voxels that lme fails to fit (singularities)
 
 # record number of vars for each model type, need predefined or rbind "simpleError"
-#sizes               <- data.frame(null=1,age=2,invAge=2,ageSq=3,ageSex=4,invAgeSex=4,ageSqSex=4 )
-sizes               <- data.frame(invAge=2)
+#sizes    <- data.frame(null=1,age=2,invAge=2,ageSq=3,ageSex=4,invAgeSex=4,ageSqSex=4 )
+#sizes    <- data.frame(invAge=2)
+#sizes    <- data.frame(invAgeSex=4, invAgeSexIQ=6, invAge=2, invAgeSlopeNull=2)
+#varsizes <- data.frame(invAgeSex=2, invAgeSexIQ=2, invAge=2, invAgeSlopeNull=1)
 
-############  All the info we want ####################3
+############# MODELS ################3
+wantModels=c("invAge", "invAgeSex", "invAgeSexIQ","invAgeSlopeNull")
+
+# model formula and info is stored in models.csv
+modelEqs <- read.table('models.csv',row.names=1,header=TRUE,sep=",")
+# have numVar,numBPT,mform,rform  for
+# "null"           "linAge"         "linAgeSex"      "sqAge"         
+# "sqAgeSex"       "invAge"         "invAgeSex"      "invAgeSexIQ"   
+# "invAgeSlopNull"
+
+
+############  All the info we want to grab from built model summary ####################
 # create a column for each "type" of output we're interested in
-#,"AIC","Deviance","ResStdErr","R2" )
 typelist <- list(
   # normal fields
-  "i","j","k",
+  "i","j","k","badVoxel",
   
   # create model.type##    eg. invAge.b0
   #   combine all the models with numbers 0 to modelVars with b,p, and t
   #    here s is the size, n is the model name
-  sapply( names(sizes), function(n) paste( n,                                       # prepend model. to everything
+  sapply( wantModels, function(n) paste( n,                                          # prepend model. to everything
     c(
-     #"AIC", "Deviance", "R2","Residual",                                           #  list of generic stats in every model
-     "AIC", "Deviance", "Residual",                                                 #  list of generic stats in every model
-     paste( 'var',  0:(if (sizes[[n]] > 1) sizes[[n]]-2 else 0),  sep=""),          #  list of all possibe var0..var1
-     sapply(0:(sizes[[n]]-1), function (s) paste( cbind("b","p","t"), s, sep=""))   #  create matrix of all p0..p2,t0..t2,b0..b2
+     #"AIC", "Deviance", "R2","Residual",
+     "AIC", "Deviance", "Residual",                                                    #  list of generic stats in every model
+     sapply(0:(modelEqs[n,"numVar"]-1), function (s) paste( cbind("var"), s, sep="")),        #  create matrix of all var0...var2
+     sapply(0:(modelEqs[n,"numBPT"]-1), function (s) paste( cbind("b","p","t"), s, sep=""))   #  create matrix of all p0..p2,t0..t2,b0..b2
     )
    ,sep="."))
 )
@@ -166,12 +152,6 @@ typelist <- list(
 for ( type in unlist(typelist) ) {  
      perVoxelModelInfo[,type] <- NA_real_ 
 }  
-# *ugly hack* get the two that were missed, add bad voxel column
-#perVoxelModelInfo$age.var1       <- NA_real_ 
-perVoxelModelInfo$invSex.var1    <- NA_real_ 
-perVoxelModelInfo$invAge.var1    <- NA_real_ 
-#perVoxelModelInfo$invAgeSex.var1 <- NA_real_ 
-perVoxelModelInfo$badVoxel       <- NA_real_ 
 
 
 
@@ -184,8 +164,8 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
 #for (vox in 1:NumVoxels){
-#LmerOutputPerVoxel <- foreach(vox=c(161:163), .combine='rbind') %do% {
-LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
+LmerOutputPerVoxel <- foreach(vox=c(159:163), .combine='rbind') %do% {
+#LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
 
@@ -193,7 +173,7 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   locDemInfo   <- DemogMRI    # local demographic information copy, for model building
   
   # give output every once and awhile so we know it's working: "09:24:04 on voxel  10 loc  33 28 4"
-  if( vox %% 50 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc ',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
+  if( vox %% 100 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc ',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
   
   
   # set indeces 
@@ -208,91 +188,117 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
   #locDemInfo$Tstat <- DataTstat[Indices$i[vox], Indices$j[vox], Indices$k[vox], ]
     
   #@@@@@@@@@@@@@@@ Use nmle @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  c <- lmeControl(10001, 10001,opt="optim")  #You need to set this equal to something or it will disappear in thin air
+  c <- lmeControl(500, 500,opt="optim")  #You need to set this equal to something or it will disappear in thin air
   # sets number of iterations  before erroring to 10001
   # use old algorithm (optim)
   
   
-  # attempt to generate models
-  attempt <- try({
-     #nlme1a0  <- lme(Beta ~ 1,             random = ~ 1      | LunaID, data=locDemInfo)            # nlme1a0: no age
-     nlme3a1  <- lme(Beta ~ invageC,       random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     #nlme3a2  <- lme(Beta ~ ageC,          random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
-     #nlme4a3  <- lme(Beta ~ ageC + ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
-     #nlme5a1  <- lme(Beta ~ invageC + sex55 + sex55:invageC,   random =~ invageC | LunaID, data=locDemInfo, control=c) # nlme3a1: invageC
-     #nlme5a2  <- lme(Beta ~ ageC + sex55 + sex55:ageC,         random =~ ageC    | LunaID, data=locDemInfo, control=c) # nlme3a2: ageC
-     #nlme5a3  <- lme(Beta ~ ageC + ageCsq + sex55 + sex55:ageCsq, random =~ ageCsq  | LunaID, data=locDemInfo, control=c) # nlme4a3: ageCsq
-     #or use update instead, eg. for null  update(nlme3a2, - ageC) ?? 
-  })
+   # attempt to generate models, here instead of per model, because if fails on one, will fail on many (?)
+   attempt <- try({
+     # go through each model we want
+     for ( mName in wantModels) {
+
+       #to see model and formula 
+       #print(paste(mName,":",  as.character(modelEqs[mName,"mform"]),",random=", as.character(modelEqs[mName,"rform"])))
+
+       # get the formulas assocated with it (orig from models.csv
+       mform <- as.formula(as.character(modelEqs[mName, "mform"]))
+       rform <- as.formula(as.character(modelEqs[mName, "rform"]))
+       mSumm<-summary(lme( mform, random=rform ,data=locDemInfo,control=c))
+
+       # for each type and it's index (p->5, t->4, b->1)
+       #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
+       for ( btp in btp.idxs ) {
+          type     <- paste(mName, btp[[1]], sep=".")                         # eg. InvAge.p0
+          indx     <- btp[[2]]                                                # eg. 5
+          vals     <- as.numeric(mSumm$tTable[,indx]);                        # eg. .0005 .002 .01
+          nameIdxs <- as.vector(paste( type, 0:(length(vals)-1),  sep="" )  ) # eg. ("InvAge.p0", "InvAge.p1", "InvAge.p2")
+
+          # put the value in the name it belongs
+          singleRow[nameIdxs] <-  vals;
+       }
+
+       # get individual values and put in model.valuename
+       singleRow[paste(mName,"AIC",sep=".")]      <-  mSumm$AIC;
+       singleRow[paste(mName,"Deviance",sep=".")] <-  mSumm$logLik*-2;
+       
+       # pseudo R^2 -- need null model
+       #singleRow[paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
+
+
+       # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
+       vals     <- VarCorr(mSumm)[,1]
+
+       # risudal is always the last thing (variable end indx) so get it by name
+       singleRow[paste(mName,"Residual",sep=".")] <-  vals["Residual"]
+       len      <-length(vals)
+
+       # len-2 so we don't include residual (already captured)
+       mName    <- paste(mName, ".var",sep="")
+       nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
+       singleRow[nameIdxs] <-  vals[1:(len-1)]
+
+     } # end of for each model
+   }, silent =TRUE) # end of try
 
   # if there was an error (sigularity?)
+  # print that and a bit of the actual error (recipr sing, or actual sing)
   if(class(attempt) == "try-error") {
-    print(   paste("   * ",format(Sys.time(), "%H:%M:%S"),"incomplete model(s) for voxel ",vox, singleRow$i,singleRow$j, singleRow$k)) 
-    # this is dangerous and stupid when doing loop in parallel?
+    print(   paste("   * ",
+                   format(Sys.time(), "%H:%M:%S"),
+                   "incomplete model(s) for voxel ",
+                   vox, singleRow$i,singleRow$j, singleRow$k,
+                   substr(attr(attempt,"condition")[1],1,35),"..."
+                   )
+         ) 
+
     #keep single row a list of nans
     singleRow$badVoxel <- 1
+
     return(singleRow)
   }
 
-  # get the summary of each model in a cute structure
-  models <- list( 
-     ##             list("null"  ,    summary(nlme1a0) ),
-                  list("invAge",    summary(nlme3a1) )
-     #             list("age"   ,    summary(nlme3a2) ),
-     #             list("ageSq" ,    summary(nlme4a3) ),
-     #             list("invAgeSex", summary(nlme5a1) ),
-     #             list("ageSex",    summary(nlme5a2) ),
-     #             list("ageSqSex",  summary(nlme5a3) ) 
-               )
 
   # and while we're here, get the sigma^2 of null
   # need null model to do this
   #nullSigma2 <- models[[4]][[2]]$sigma^2
 
 
-  # for each type and it's index (p->5, t->4, b->1)
-  #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
-  for ( m in models ) {
-     mName <- m[[1]] # model name
-     mSumm <- m[[2]] # model summary
+  ####
+  # if there are any na, say so  --- this should only happen when num* in models.csv are too high
+  # useful for testing
+  nans<-which(is.na(singleRow));
+  if(length(nans)>1) { # first nan is bad voxel, hopefully
+   print(paste("nans:",paste(names(singleRow)[nans],collapse="")))
+  }
+  ###
 
-     for ( btp in btp.idxs ) {
-        type     <- paste(mName, btp[[1]], sep=".")                         # eg. InvAge.p0
-        indx     <- btp[[2]]                                                # eg. 5
-        vals     <- as.numeric(mSumm$tTable[,indx]);                        # eg. .0005 .002 .01
-        nameIdxs <- as.vector(paste( type, 0:(length(vals)-1),  sep="" )  ) # eg. ("InvAge.p0", "InvAge.p1", "InvAge.p2")
+  # check the length before doing 1000s of comparisons only to fail
+  # this happens when num* in models.csv are too small
+  thisLen     <- length(singleRow)
+  expectedLen <- length(perVoxelModelInfo)
 
-        # put the value in the name it belongs
-        singleRow[nameIdxs] <-  vals;
-
-     }
-
-     # get individual values and put in model.valuename
-     singleRow[paste(mName,"AIC",sep=".")]      <-  mSumm$AIC;
-     singleRow[paste(mName,"Deviance",sep=".")] <-  mSumm$logLik*-2;
-     
-     # pseudo R^2 -- need null model
-     #singleRow[paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
-
-
-     # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
-     vals     <- VarCorr(mSumm)[,1]
-
-     # risudal is always the last thing (variable end indx) so get it by name
-     singleRow[paste(mName,"Residual",sep=".")] <-  vals["Residual"]
-     len      <-length(vals)
-
-     # len-2 so we don't include residual (already captured)
-     mName    <- paste(mName, ".var",sep="")
-     nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
-     singleRow[nameIdxs] <-  vals[1:(len-1)]
+  # != could be written >, < should never happen
+  if(thisLen != expectedLen){
+    print(paste("****", vox  ,"singleRow (",thisLen, ") is wrong length! expect ",expectedLen))
+    print(paste(names(singleRow)[thisLen:expectedLen],collapse=" "))
+    
+    # fudge the data (so we dont die after doing all the work), and mark badVox to reflect this
+    singleRow <- perVoxelModelInfo
+    singleRow$Indexnumber <- Indices$Indexnumber[vox]
+    singleRow$i           <- Indices$i[vox]
+    singleRow$j           <- Indices$j[vox]
+    singleRow$k           <- Indices$k[vox]
+    singleRow$badVoxel <- 2
   }
 
-  return(singleRow)  # this is the return value of foreach, put into LmerOutputPerVoxel
+
+  # this is the return value of foreach, put into LmerOutputPerVoxel
+  return(singleRow)  
 }
 
 
 
 print("saving output ")
-save.image(file=paste(RdataName, "lmr-invOnly.RData", sep="_"))
+save.image(file=paste(RdataName, "test-invSexIQ.RData", sep="_"))
 #
