@@ -32,7 +32,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(1) #registerDoMC(26)
+registerDoMC(26) #registerDoMC(26)
 require(foreach)
 
 
