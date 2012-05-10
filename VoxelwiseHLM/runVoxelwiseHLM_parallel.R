@@ -142,6 +142,7 @@ NumVisits      <- DataBeta$dim[4]                     # This would be 302
 Demographics         <- read.table(opt$demo,sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
+# or ASerrMinAScorr
 if(grepl("err", niifile, ignore.case=TRUE)) {
    print("Removing dA1se3sd == NA")
    Demographics <- Demographics[ -which(is.na(Demographics$dA10er3sd)), ]
@@ -181,6 +182,19 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 #sizes    <- data.frame(invAgeSex=4, invAgeSexIQ=6, invAge=2, invAgeSlopeNull=2)
 #varsizes <- data.frame(invAgeSex=2, invAgeSexIQ=2, invAge=2, invAgeSlopeNull=1)
 
+<<<<<<< HEAD
+=======
+############# MODELS ################
+wantModels=c("invAge", "invAgeSex", "invAgeSexIQ","invAgeSlopeNull")
+
+# model formula and info is stored in models.csv
+modelEqs <- read.table('models.csv',row.names=1,header=TRUE,sep=",")
+# have numVar,numBPT,mform,rform  for
+# "null"           "linAge"         "linAgeSex"      "sqAge"         
+# "sqAgeSex"       "invAge"         "invAgeSex"      "invAgeSexIQ"   
+# "invAgeSlopNull"
+
+>>>>>>> 6cb18071c1de276a6b8998a998c18d835aa8e8ea
 
 ############  All the info we want to grab from built model summary ####################
 # create a column for each "type" of output we're interested in
