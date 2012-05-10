@@ -20,17 +20,80 @@
 #  models.csv                         (model info -- num{Var,BPT},mform, rform)
 #  inputnii/mask_copy                 (brain mask)
 
+suppressPackageStartupMessages(library(optparse))
+
 ############## get NiFTI from commandlike
-cmdargs <- commandArgs(TRUE)
-niifile <- as.character(cmdargs[1])
+option_list <- list( 
+                make_option(c("-n", "--nifti"), 
+                           type="character", default="",
+                           help="nifti file containing betas, must match demographic in dimension [required]"),
+                make_option(c("-d", "--demo"), 
+                           type="character", default="Data302_9to26_20120504_copy.dat",
+                           help="demographics tsv file containing eg. invAgeC,ageC,sex,IQ,LunaID [default %default]"),
+                make_option(c("-m", "--models"), 
+                           help="list of models to run [default %default]",
+                           type="character", default="invAge,invAgeSex,invAgeSexIQ,invAgeSlopeNull"),
+                make_option(c("-p", "--prefix"), 
+                           help="outputPrefix  [default Rdata/$(basename nifti).Rdata]",
+                           type="character", default=""),
+                make_option(c("-c", "--modelcsv"), 
+                           help="model csv (header:name, numVar,numBPT,mform,rform) file [default %default]",
+                           type="character", default="models.csv"),
+                make_option(c("-a", "--mask"), 
+                           help="comma deliminted list of models to run [default %default]",
+                           type="character", default="inputnii/mask_copy.nii"),
+                make_option(c("-u", "--cpus"), 
+                           help="number of cpus to use [default %default]",
+                           type="integer", default=26)
+               )
+
+opt <- parse_args(OptionParser(option_list=option_list))
+
+# accomidate old code
+niifile <- opt$nifti
+# set cpus
+
+########## some checks on options
 if(! file.exists(niifile)){
- stop(paste("need file argument! the one provide '", niifile, "' doesn't exist!",sep=""))
+ stop(paste("need file argument (-n) see help (-h)! the one provide '", niifile, "' doesn't exist!",sep=""))
+}
+if(! file.exists(opt$demo)){
+ stop(paste("demographic file",opt$demo,"is not readable (--demo)!"))
+}
+if(! file.exists(opt$modelcsv)){
+ stop(paste("model",opt$modelcsv,"is not readable (--modelcsv)!"))
+}
+# this check is kin
+if(! file.exists(opt$mask)){
+ stop(paste("brain mask",opt$mask,"is not readable (--mask)!"))
 }
 
+############# MODELS ################
+#wantModels=c("invAge", "invAgeSex", "invAgeSexIQ","invAgeSlopeNull")
+wantModels <- unlist(strsplit(opt$models,","))
+
+# model formula and info is stored in models.csv
+modelEqs <- read.table(opt$modelcsv,row.names=1,header=TRUE,sep=",")
+# have numVar,numBPT,mform,rform  for
+# "null"           "linAge"         "linAgeSex"      "sqAge"         
+# "sqAgeSex"       "invAge"         "invAgeSex"      "invAgeSexIQ"   
+# "invAgeSlopNull"
+
+# check that all the models we want exist in modelcsv
+if(any(is.na(modelEqs[wantModels,]))) stop(paste("some models dont exist in", opt$modelcsv))
+
+####### Outputname
 # where to save the output, remove .nii.gz
-RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "",sep="") 
+RdataName <- opt$prefix
+if(RdataName  == "" ) {
+   RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "",sep="") 
+   RdataName <- paste(RdataName, "invSexIQ.RData", sep="_")
+}
+print(paste("writing output to",RdataName))
+
 
 ###############Load appropriate libraries############
+suppressPackageStartupMessages({
 library(Rniftilib)
 library(nlme)
 
@@ -39,14 +102,15 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(25) #registerDoMC(26)
 require(foreach)
+})
 
+
+#### get the cpus we need
+registerDoMC(opt$cpus) #registerDoMC(26)
 
 ################Generate demographics data ("DemographicsPerVoxelVisit")#################
 print("building inputs")
-
-
 
 
 ################# Read in subject data (4D) #################
@@ -55,7 +119,7 @@ DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x302
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
 # niftis orientation converted from RAM --> LPI (hopefully)
-Mask <- nifti.image.read("inputnii/mask_copy")        #Output will be (64x76x64)
+Mask <- nifti.image.read(opt$mask)        #Output will be (64x76x64)
 
 #... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
 Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
@@ -75,7 +139,7 @@ NumVisits      <- DataBeta$dim[4]                     # This would be 302
 # 10124	060803163400	12.97741273100616	1
 #Demographics        <- read.table("listage.Err.txt")
 #names(Demographics) <- c("LunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
-Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",header=TRUE)
+Demographics         <- read.table(opt$demo,sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
 if(grepl("err", niifile, ignore.case=TRUE)) {
@@ -116,16 +180,6 @@ btp.idxs            <- list( list("p",5), list("t", 4), list("b", 1) )
 #sizes    <- data.frame(invAge=2)
 #sizes    <- data.frame(invAgeSex=4, invAgeSexIQ=6, invAge=2, invAgeSlopeNull=2)
 #varsizes <- data.frame(invAgeSex=2, invAgeSexIQ=2, invAge=2, invAgeSlopeNull=1)
-
-############# MODELS ################3
-wantModels=c("invAge", "invAgeSex", "invAgeSexIQ","invAgeSlopeNull")
-
-# model formula and info is stored in models.csv
-modelEqs <- read.table('models.csv',row.names=1,header=TRUE,sep=",")
-# have numVar,numBPT,mform,rform  for
-# "null"           "linAge"         "linAgeSex"      "sqAge"         
-# "sqAgeSex"       "invAge"         "invAgeSex"      "invAgeSexIQ"   
-# "invAgeSlopNull"
 
 
 ############  All the info we want to grab from built model summary ####################
@@ -301,5 +355,5 @@ LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
 
 
 print("saving output ")
-save.image(file=paste(RdataName, "invSexIQ.RData", sep="_"))
+save.image(file=paste(RdataName))
 #
