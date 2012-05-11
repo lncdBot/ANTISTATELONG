@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# average b1 (invageC -- slope)  and b2 (sex55:invageC -- interaction)  in signfigant clusters
+# average b1 (invageC -- slope)  and b2 (sex55:invageC -- interaction)  in significant clusters
 #
 
 ## Allow overlap ##
