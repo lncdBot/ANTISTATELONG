@@ -62,18 +62,20 @@ if(RdataName  == "" ) {
    RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "_invAgeMovie.RData",sep="") 
 }
 print(paste("writing output to",RdataName))
+
 ###############Load appropriate libraries############
-library(Rniftilib)
-library(nlme)
+suppressPackageStartupMessages({
+   library(Rniftilib)
+   library(nlme)
 
-# do things in parallel
-#require(snow)
-#require(doSNOW) 
-#registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
-require(doMC) 
-registerDoMC(opt$cpus) #registerDoMC(26)
-require(foreach)
-
+   # do things in parallel
+   #require(snow)
+   #require(doSNOW) 
+   #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
+   require(doMC) 
+   registerDoMC(opt$cpus) #registerDoMC(26)
+   require(foreach)
+})
 
 ################Generate demographics data ("DemographicsPerVoxelVisit")#################
 print("building inputs")
@@ -145,6 +147,9 @@ agesToCenter    <- c(9, 11, 13, 15, 17, 19, 21, 23, 25)
 ############  All the info we want ####################3
 # create a column for each "type" of output we're interested in
 #,"AIC","Deviance","ResStdErr","R2" )
+ageSexcombs <- expand.grid(agesToCenter,c("male","female"))
+ageSexcombs <- apply(ageSexcombs,1,paste,collapse=".")
+ageSexcombs <- sub(' ','', ageSexcombs) # " 9..." to "9.."
 typelist <- list(
   # normal fields
   "i","j","k",
@@ -152,7 +157,7 @@ typelist <- list(
   # create model.type##    eg. invAge.b0
   #   combine all the models with numbers 0 to modelVars with b,p, and t
   #    here s is the size, n is the model name
-  sapply( agesToCenter, function(n) paste( n,                                       # prepend model. to everything
+  sapply( ageSexcombs, function(n) paste( n,     # prepend model. to everything
     c(
      "AIC", "Deviance", "Residual",                                                 #  list of generic stats in every model
      sapply(0:1, function (s) paste( cbind("b","p","t","var"), s, sep=""))          #  create matrix of all p0..p2,t0..t2,b0..b2
@@ -223,10 +228,12 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
         locDemInfo$invageC <- (actualAge - invCenter)
 
         # add model to list
-        nlmeLin[[newcenter]] <- lme(Beta ~ invageC + sex55 + sex55:invageC, random =~ invageC | LunaID, data=locDemInfo, control=c)
-        #nlmeLin[[newcenter]] <- lme(Beta ~ invageC, random =~ invageC | LunaID, data=locDemInfo, control=c)
+        nlmeLin[[paste(newcenter,"female",sep=".")]] <- lme(Beta ~ invageC + sexMref,random =~ invageC | LunaID, data=locDemInfo, control=c)
+        nlmeLin[[paste(newcenter,"male",  sep=".")]] <- lme(Beta ~ invageC + sexNum, random =~ invageC | LunaID, data=locDemInfo, control=c)
+        # cant use below for male/female only -- sex55 is same for all
+        #nlmeLin[[newcenter]] <- lme(Beta ~ invageC + sex55 + sex55:invageC, random =~ invageC | LunaID, data=locDemInfo, control=c)
      }
-  },silent=TRUE)
+  },silent=(!opt$test))
 
   # if there was an error (sigularity?)
   if(class(attempt) == "try-error") {
@@ -248,8 +255,9 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
   # for each type and it's index (p->5, t->4, b->1)
   #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
   for (newcenter in agesToCenter) { 
-     mName <- newcenter                        # model name
-     mSumm <- summary(nlmeLin[[newcenter]])    # model summary
+   for (sex in c("male","female") ) { 
+     mName <- paste(newcenter,sex,sep=".")     # model name
+     mSumm <- summary(nlmeLin[[mName]])    # model summary
 
      for ( btp in btp.idxs ) {
         type     <- paste(mName, btp[[1]], sep=".")                         # eg. 9.p
@@ -278,6 +286,7 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
      mName    <- paste(mName, ".var",sep="")
      nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
      singleRow[nameIdxs] <-  vals[1:(len-1)]
+   }
   }
 
   # check everything is as it should be before sending off the data
