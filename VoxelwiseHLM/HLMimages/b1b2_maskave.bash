@@ -33,13 +33,11 @@
 
 
 # get average b1/2 of the clusters
-echo "b1 (invageC): "
-for i in {1..5}; do 
-   echo -en "\troi $i: "
-   3dmaskave -mrange $i $i -mask tGT2.016_mask+tlrc. ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc[invAgeSex.b1] 2>/dev/null
+for b in b{0..2}; do
+   echo "$b: "
+   for i in {1..6}; do 
+      echo -en "\troi $i: "
+      3dmaskave -mrange $i $i -mask tGT2.016_mask+tlrc. ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc[invAgeSex.$b] 2>/dev/null
+   done
 done
 
-i=6
-echo "b2: (age55:invageC) "
-echo -en "\troi $i: "
-   3dmaskave -mrange $i $i -mask tGT2.016_mask+tlrc. ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc[invAgeSex.b2] 2>/dev/null
