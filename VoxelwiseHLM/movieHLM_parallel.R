@@ -15,14 +15,53 @@
 #        externalprt error with doSNOW
 
 ############## get NiFTI from commandlike
-cmdargs <- commandArgs(TRUE)
-niifile <- as.character(cmdargs[1])
+suppressPackageStartupMessages(library(optparse))
+
+############## get NiFTI from commandlike
+option_list <- list( 
+                make_option(c("-n", "--nifti"), 
+                           type="character", default="",
+                           help="nifti file containing betas, must match demographic in dimension [required]"),
+                make_option(c("-d", "--demo"), 
+                           type="character", default="Data302_9to26_20120504_copy.dat",
+                           help="demographics tsv file containing eg. invAgeC,ageC,sex,IQ,LunaID [default %default]"),
+                make_option(c("-p", "--prefix"), 
+                           help="outputPrefix  [default Rdata/$(basename nifti).Rdata]",
+                           type="character", default=""),
+                make_option(c("-a", "--mask"), 
+                           help="comma deliminted list of models to run [default %default]",
+                           type="character", default="inputnii/mask_copy.nii"),
+                make_option(c("-t", "--test"), 
+                           help="only run as a test (for subj 161:163)",
+                           action="store_true", default=FALSE),
+                make_option(c("-u", "--cpus"), 
+                           help="number of cpus to use [default %default]",
+                           type="integer", default=26)
+               )
+
+opt <- parse_args(OptionParser(option_list=option_list))
+
+# accomidate old code
+niifile <- opt$nifti
+
+########## some checks on options
 if(! file.exists(niifile)){
- stop(paste("need file argument! the one provide '", niifile, "' doesn't exist!",sep=""))
+ stop(paste("need file argument (-n) see help (-h)! the one provide '", niifile, "' doesn't exist!",sep=""))
+}
+if(! file.exists(opt$demo)){
+ stop(paste("demographic file",opt$demo,"is not readable (--demo)!"))
+}
+# this check is kin
+if(! file.exists(opt$mask)){
+ stop(paste("brain mask",opt$mask,"is not readable (--mask)!"))
 }
 
 # save output as "niifile-PAR" 
-RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "_invAgeMovie.RData",sep="") 
+RdataName <- opt$prefix
+if(RdataName  == "" ) {
+   RdataName <- paste( "Rdata/", sub('.nii(.gz)?','',basename(niifile)), "_invAgeMovie.RData",sep="") 
+}
+print(paste("writing output to",RdataName))
 ###############Load appropriate libraries############
 library(Rniftilib)
 library(nlme)
@@ -32,7 +71,7 @@ library(nlme)
 #require(doSNOW) 
 #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
 require(doMC) 
-registerDoMC(26) #registerDoMC(26)
+registerDoMC(opt$cpus) #registerDoMC(26)
 require(foreach)
 
 
@@ -48,7 +87,7 @@ DataBeta  <- nifti.image.read(niifile)   #Output will be 64x76x64x302
 
 #... Read in 3D mask (/Volumes/Governator/ANTISTATELONG/Reliability/mask.nii)
 # niftis orientation converted from RAM --> LPI (hopefully)
-Mask <- nifti.image.read("inputnii/mask_copy")        #Output will be (64x76x64)
+Mask <- nifti.image.read(opt$mask)        #Output will be (64x76x64)
 
 #... Create matrices with indices for each nonzero mask voxel (bc we will only read in data within mask to save RAM)
 Indexnumber    <- which(Mask[,,]>0)                   # Find all voxels>0  
@@ -63,7 +102,7 @@ NumVoxels      <- length(Indexijk[,1])                # This will be 67,976
 NumVisits      <- DataBeta$dim[4]                     # This would be 302
 
 #### Demographic info
-Demographics         <- read.table("Data302_9to26_20120504_copy.dat",sep="\t",header=TRUE)
+Demographics         <- read.table(opt$demo,sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
 if(grepl("err", niifile, ignore.case=TRUE)) {
@@ -127,7 +166,7 @@ for ( type in unlist(typelist) ) {
      perVoxelModelInfo[,type] <- NA_real_ 
 }  
 # *ugly hack* get the two that were missed, add bad voxel column
-perVoxelModelInfo$badVoxel       <- NA_real_ 
+perVoxelModelInfo$badVoxel    <- NA_real_ 
 
 
 
@@ -140,16 +179,19 @@ print(paste(format(Sys.time(), "%H:%M:%S"), "  starting calculations"))
 # save betas, t-stats, p-vals, sigma^2, variences and pseudo R^2 
 
 #for (vox in 1:NumVoxels){
-#LmerOutputPerVoxel <- foreach(vox=c(161:163), .combine='rbind') %do% {
-LmerOutputPerVoxel <- foreach(vox=1:NumVoxels, .combine='rbind') %dopar% {
+
+iterationRange<-1:NumVoxels
+if(opt$test)  iterationRange <- 161:163
+LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
   # a single row of LmerOutputPerVoxel
   singleRow    <- perVoxelModelInfo  
 
   locDemInfo   <- DemogMRI    # local demographic information copy, for model building
   
   # give output every once and awhile so we know it's working: "09:24:04 on voxel  10 loc  33 28 4"
-  if( vox %% 1 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc ',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
+  if( vox %% 200 == 0 || opt$test)  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc ',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
   
+  if( vox  == NumVoxels )  print(paste(format(Sys.time(), "%H:%M:%S"), ' HLM for last voxel started!') )
   
   # set indeces 
   singleRow$Indexnumber <- Indices$Indexnumber[vox]

@@ -231,10 +231,9 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {  #
   locDemInfo   <- DemogMRI    # local demographic information copy, for model building
   
   # give output every once and awhile so we know it's working: "09:24:04 on voxel  10 loc  33 28 4"
-  if( vox %% 100 == 0 )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
+  if( vox %% 100 == 0 || opt$test )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
   if( vox  == NumVoxels )  print(paste(format(Sys.time(), "%H:%M:%S"), ' HLM for last voxel started!') )
   
-  if( opt$test )  print(paste(format(Sys.time(), "%H:%M:%S"), ' on voxel ',  vox, 'loc',  Indices$i[vox], Indices$j[vox], Indices$k[vox] ))
   
   # set indeces 
   singleRow$Indexnumber <- Indices$Indexnumber[vox]
