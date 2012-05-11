@@ -99,15 +99,15 @@ print(paste("writing output to",RdataName))
 
 ###############Load appropriate libraries############
 suppressPackageStartupMessages({
-library(Rniftilib)
-library(nlme)
-
-# do things in parallel
-#require(snow)
-#require(doSNOW) 
-#registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
-require(doMC) 
-require(foreach)
+  library(Rniftilib)
+  library(nlme)
+  
+  # do things in parallel
+  #require(snow)
+  #require(doSNOW) 
+  #registerDoSNOW(  makeCluster(rep("localhost",8), type="SOCK") ) # error with externalprt type?
+  require(doMC) 
+  require(foreach)
 })
 
 
@@ -262,8 +262,32 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {  #
 
        # get the formulas assocated with it (orig from models.csv
        mform <- as.formula(as.character(modelEqs[mName, "mform"]))
-       rform <- as.formula(as.character(modelEqs[mName, "rform"]))
-       mSumm<-summary(lme( mform, random=rform ,data=locDemInfo,control=c))
+       
+       if(as.character(modelEqs[mName,"rform"])==""){
+          mSumm    <- summary(gls( mform, data=locDemInfo)) #use gen least sq. without random
+          btp.idxs <- list( list("p",4), list("t", 3), list("b", 1) )
+       }
+       else{
+          rform <- as.formula(as.character(modelEqs[mName, "rform"]))
+          mSumm <- summary(lme( mform, random=rform ,data=locDemInfo,control=c))
+          
+          # varience only if mix model
+
+          # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
+          vals     <- VarCorr(mSumm)[,1]
+
+          # risudal is always the last thing (variable end indx) so get it by name
+          singleRow[paste(mName,"Residual",sep=".")] <-  vals["Residual"]
+          len      <-length(vals)
+
+          # len-2 so we don't include residual (already captured)
+          varName    <- paste(mName, ".var",sep="")
+          nameIdxs <- as.vector(paste( varName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
+          singleRow[nameIdxs] <-  vals[1:(len-1)]
+
+          # set up p t and b index
+          btp.idxs <- list( list("p",5), list("t", 4), list("b", 1) )
+       }
 
        # if testing, give some output
        # if( opt$test )  print(mName);
@@ -288,20 +312,9 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {  #
        #singleRow[paste(mName,"R2",sep=".")] <- (nullSigma2 - mSumm$sigma^2)/nullSigma2 
 
 
-       # grab all the variences (ordered like:    (Intercept)           ageC       Residual )
-       vals     <- VarCorr(mSumm)[,1]
-
-       # risudal is always the last thing (variable end indx) so get it by name
-       singleRow[paste(mName,"Residual",sep=".")] <-  vals["Residual"]
-       len      <-length(vals)
-
-       # len-2 so we don't include residual (already captured)
-       mName    <- paste(mName, ".var",sep="")
-       nameIdxs <- as.vector(paste( mName, 0:(len-2),  sep="" )  ) # eg. ("InvAge.var0", "InvAge.var1" ... )
-       singleRow[nameIdxs] <-  vals[1:(len-1)]
 
      } # end of for each model
-   }, silent =TRUE) # end of try
+   }, silent = !opt$test) # end of try
 
   # if there was an error (sigularity?)
   # print that and a bit of the actual error (recipr sing, or actual sing)
@@ -327,11 +340,13 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {  #
 
 
   ####
-  # if there are any na, say so  --- this should only happen when num* in models.csv are too high
+  # if there are any na, say so  --- this should only happen when num* in models.csv are too high (see invAgeNoRand)
   # useful for testing
-  nans<-which(is.na(singleRow));
-  if(length(nans)>1) { # first nan is bad voxel, hopefully
-   print(paste("nans:",paste(names(singleRow)[nans],collapse="")))
+  if(opt$test){
+     nans<-which(is.na(singleRow));
+     if(length(nans)>1) { # first nan is bad voxel, hopefully
+      print(paste("nans:",paste(names(singleRow)[nans],collapse=" ")))
+     }
   }
   ###
 
