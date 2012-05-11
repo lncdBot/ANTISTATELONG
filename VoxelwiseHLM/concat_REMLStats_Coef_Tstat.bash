@@ -5,7 +5,7 @@
 
 #Purpose: 	Concatenate all data files into 4D file to be fed into R script
 #Notes:		See bottom of this file
-#			There should be 312 visits bc I excluded 10816/111109163617
+# 302 visits for corr,  287 for errorCorr
 
 #what do we want  e.g. ASerrorCorr ASCorr
 #AStype="ASerrorCorr"
