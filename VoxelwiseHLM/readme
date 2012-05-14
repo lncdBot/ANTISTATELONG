@@ -4,7 +4,8 @@
     * for AScorr and ASerrorCorr
     * output's niis to inputnii/
 2. runVoxelwiseHLM_parallel.R 
-   * e.g. Rscript runVoxelwiseHLM_parallel.R inputnii/AScorr-Coef.nii
+   * e.g. Rscript runVoxelwiseHLM_parallel.R -n inputnii/AScorr-Coef.nii
+   * see  Rscript runVoxelwiseHLM_parallel.R -h 
    * should copy inputnii to gromit and run there
    * creates Rdata files in Rdata/ (should copy back to arnold)
 

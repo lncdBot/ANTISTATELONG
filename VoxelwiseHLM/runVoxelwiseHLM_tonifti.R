@@ -104,7 +104,37 @@ rm(AFNIout, results)
 gc()
 
 
+### make mask of all the "bad" voxels #########
+ImageName <- paste(ImageName,"_badVoxMask",sep="")
+results <- array(0, c(64,76,64,1))
 
+badVoxels  <- which(!is.na(LmerOutputPerVoxel[,"badVoxel"]))
+MaskIndices <- LmerOutputPerVoxel[badVoxels,2:4] # i j k
+
+# i j k are all 1 less than position read in?? weird index issue
+pos          <- cbind((MaskIndices[,1]),(MaskIndices[,2]),(MaskIndices[,3]))
+results[pos] <- LmerOutputPerVoxel[badVoxels, "badVoxel"] # could be 1 (model error) or 2 (code error)
+
+AFNIout <- new("afni", results, 
+              IDCODE_STRING=ImageName,
+              BYTEORDER_STRING="LSB_FIRST",
+              TEMPLATE_SPACE="MNI",
+              ORIENT_SPECIFIC=as.integer(c(1,2,4)), #LPI
+              #ORIENT_SPECIFIC=as.integer(c(0,3,4)), #RAI
+              DATASET_DIMENSIONS=as.integer(c(64, 76, 64, 0, 0)),
+              DATASET_RANK=c(3L, as.integer(1)),
+              TAXIS_NUMS=c(as.integer(1), 0L),
+              TYPESTRING="3DIM_HEAD_FUNC",
+              SCENE_DATA=c(2L, 11L, 1L), #2=tlrc view, 11=anat_buck_type, 1=3dim_head_func typestring
+              DELTA=c(-3, -3, 3),
+              ORIGIN=c(94.5, 130.5, -76.5),
+              BRICK_TYPES=rep(3L, 1), #float
+              BRICK_LABS="BadVox"
+              )
+
+writeAFNI(AFNIout, paste("HLMimages/",ImageName,"+tlrc",sep=""), verbose=TRUE)
+rm(AFNIout, results)
+gc()
 ##########################END!#########################
 
 #####FOR 3D DATA#################
