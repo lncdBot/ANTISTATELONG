@@ -14,6 +14,13 @@
 corrImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/AScorr-Coef_invSexIQ+tlrc"
  errImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc"
 
+thres=3.375
+clustsize=13
+dir="3-clust$clustsize-t$thres"
+[ -d $dir ] || mkdir -p $dir;
+cd $dir
+
+
 function calcandcluster {
   img=$1
   prefix=$2
@@ -28,12 +35,8 @@ function calcandcluster {
   # calcandcluster
   3dclust -1Dformat -nosum -1dindex 0 -1tindex 0 -2thresh -0.5 0.5 -dxyz=1 \
           -overwrite \
-          -savemask "${prefix}_mask"  1.01 33 $prefix.nii.gz  | tee "$prefix.clusts"
+          -savemask "${prefix}_mask"  1.01 $clustsize $prefix.nii.gz  | tee "$prefix.clusts"
 }
-
-dir='3'
-[ -d $dir ] || mkdir -p $dir;
-cd $dir
 
 set -xe
 for img in "$corrImg" "$errImg"; do
@@ -43,26 +46,26 @@ for img in "$corrImg" "$errImg"; do
 
   ############# 3a
   # b1 pos, b2 pos, both sig 
-  calcandcluster $img "${imgname}_3a_0+1+" 'ispositive(b-2.016) * ispositive(d-2.016) * ispositive(a) * ispositive(c)'
+  calcandcluster $img "${imgname}_3a_0+1+" "ispositive(b-$thres) * ispositive(d-$thres) * ispositive(a) * ispositive(c)"
   
   ############# 3b
   # b1 pos, b1 neg, both sig 
-  calcandcluster $img "${imgname}_3a_0+1-" 'ispositive(b-2.016) * ispositive(d-2.016) * ispositive(a) * isnegative(c)'
+  calcandcluster $img "${imgname}_3a_0+1-" "ispositive(b-$thres) * ispositive(d-$thres) * ispositive(a) * isnegative(c)"
 
   ############# 3c
   # b1 neg, b1 pos, both sig 
-  calcandcluster $img "${imgname}_3a_0-1+" 'ispositive(b-2.016) * ispositive(d-2.016) * isnegative(a) * ispositive(c)'
+  calcandcluster $img "${imgname}_3a_0-1+" "ispositive(b-$thres) * ispositive(d-$thres) * isnegative(a) * ispositive(c)"
 
   ############# 3d
   # b1 neg, b2 neg, both sig 
-  calcandcluster $img "${imgname}_3a_0-1-" 'ispositive(b-2.016) * ispositive(d-2.016) * isnegative(a) * isnegative(c)' 
+  calcandcluster $img "${imgname}_3a_0-1-" "ispositive(b-$thres) * ispositive(d-$thres) * isnegative(a) * isnegative(c)" 
 
   ############# 3e
   # b0 insig, b1 pos
-  calcandcluster $img "${imgname}_3a_1+" 'isnegative(b-2.016) * ispositive(d-2.016) * ispositive(c)'
+  calcandcluster $img "${imgname}_3a_1+"   "isnegative(b-$thres) * ispositive(d-$thres) * ispositive(c)"
 
   ############# 3f
   # b0 insig, b1 neg
-  calcandcluster $img "${imgname}_3a_1-" 'isnegative(b-2.016) * ispositive(d-2.016) * isnegative(c) ' \
+  calcandcluster $img "${imgname}_3a_1-"   "isnegative(b-$thres) * ispositive(d-2.016) * isnegative(c)" \
 
 done
