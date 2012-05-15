@@ -33,7 +33,7 @@
 
 
 # get average b1/2 of the clusters
-for b in b{0..2}; do
+for b in b{0..3}; do
    echo "$b: "
    for i in {1..6}; do 
       echo -en "\troi $i: "
