@@ -42,7 +42,18 @@ Group 6a&b:    AIC is max for invage model
 Group 7a&b:    AIC is max for age model
 Group 8a&b:    AIC is max for agesq model
   
+####Revised Part 1: Now that we know invage is best for all regions:
+What does devt change look like?
+           invageB0, invageB1,  ValueinvageB0  ValueinvageB1, 
+Group 3a:      sig      sig              pos          pos           Sig devt change - inverse. Value in adol pos, but approaches zero
+Group 3b:      sig      sig              pos          neg           Sig devt change - inverse. Value in adol pos, and gets more +
+Group 3c:      sig      sig              neg          pos           Sig devt change - inverse. Value in adol neg, but gets more -
+Group 3d:      sig      sig              neg          neg           Sig devt change - inverse. Value in adol neg, but gets more +
+Group 3e:      n.s.     sig              -            pos           Sig devt change - inverse. At zero in adol, and gets more -
+Group 3f:      n.s.     sig              -            neg           Sig devt change - inverse. At zero in adol, and gets more +
 
+###Revised Part 2:
+EXplore 4 variability options for part 2
 
 > nlme4a3s$tTable
                   Value    Std.Error   DF    t-value    p-value
