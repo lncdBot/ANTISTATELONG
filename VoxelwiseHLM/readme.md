@@ -13,7 +13,28 @@
    * e.g. Rscript runVoxelwiseHLM_tonifti.R Rdata/AScorr-PAR-lmr.RData
    * create output head/brick in HLMimages/
 
-4. sort: 
+4. sort results into 1 of possible 6, then 24 categories 
+
+  `3-sortB1Sign.bash`
+
+  threshold on p value and cluster size and then on the difference of deviances
+
+    * create subfolder with masked regions based on threshold and clusterize (p=.05)
+    * for both Corr and Err
+    * for invAge with sig slope (t1 > 2.86)
+    * check sign (b1)
+    * check sign of intercept (b0)
+    * clusterize with NN2 (rms 1.41) and > 13.4 voxels
+    * create e.g. Err_0+1+ => for corrected errors, intercept is positive, slope is positive 
+    * ID clusters with whereami
+    * for each cluster, check number of voxels matching (passes if >=50%)
+        * abs(dev_nullXXX - dev_invAgeSexIQ) for significance (p=.05,df=1: > 3.84)
+            * dev_nullSlope dev_nullInt
+        * slope and intercept sig of IQ and Sex (t2..t5 > 2.86) 
+           * sub sub folder ("indv/") of these cluster specific masks
+
+
+
 
 
 a0: no age term modeled
