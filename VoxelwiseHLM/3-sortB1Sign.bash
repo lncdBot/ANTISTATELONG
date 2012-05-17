@@ -13,7 +13,7 @@
 
 export corrImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/AScorr-Coef_invSexIQ+tlrc"
 export  errImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc"
-export  errDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_v2.Rdata+tlrc"
+export  errDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_err+tlrc"
 export  corDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_v2.Rdata+tlrc"
 #  p .001
 #thres=3.375
@@ -28,7 +28,7 @@ dir="3-clust$clustsize-t$thres"
 [ -d $dir ] && rm -r $dir 
 mkdir -p $dir && cd $dir
 ln -s $HOME/standard/mni_icbm152_nlin_asym_09c/mni_icbm152_t1_tal_nlin_asym_09c_3mm.nii ./
-echo -ne "values\tn\tBrainLocation\tmaskSize\tsigSlopeSize\tsssPercent\tsigIntSize\tsisPercent" > clusterInfo.txt
+echo -ne "values\tn\tBrainLocation\tmaskSize\tDevSigSlope#vox\tslopePercent\tDevSigInt#vox\tintPercent" > clusterInfo.txt
 echo -e  "\tt2\tpt2\tt4\tpt4\tt3\tpt3\tt5\tpt5"  >> clusterInfo.txt
 
 
