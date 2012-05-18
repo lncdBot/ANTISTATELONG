@@ -15,6 +15,7 @@ sexIdx = 11;      % sex       as sexnum
 
 for i=1:length(files)
 
+
    % find the csvs or skip to next file
    % skip any like *6.csv (don't use model6)
    name=files(i).name;
@@ -34,17 +35,24 @@ for i=1:length(files)
 
     
    % open file, skip the first row but don't ignore any columns
+   clear('intAndSlope')
    intAndSlope = csvread([d, name],1,11);
+   if( length(find(abs(intAndSlope)>98))>0 ); disp(['found outragous values']); end
 
    % get region name
-   rname = regexp(name,'resfile2_(.*).csv','match');
-   rname = rname{1}(10:end-4); 
+   % original name like: Data302_9to26_20120504_wExtra_REML_resfile2_ageC_insula_L.csv
+   %r_name = regexp(name,'resfile2_(.*).csv','match');
+   %r_name = r_name{1}(10:end-4); 
+   % name now like ageC_insula_L.csv
+   r_name=name(1:end-4);                  % remove extension, now have ageC_insula_L
+   rname = regexprep(r_name,'_',' ');     % remove _
+   rname = regexprep(rname,'ageC','age'); % remove C
 
    % plot
-   fig=figure; hold on; 
+   fig=figure; hold on; xlim([9 25]); ylim([-.05 .15 ])
 
    % labeling and title
-   xlabel('Age'); ylabel('% signal change'); title(['change in age with ' rname '( ' type  ')']);
+   xlabel('Age'); ylabel('% Signal Change'); title(rname);
 
    % check that sex is right
     name
@@ -63,15 +71,18 @@ for i=1:length(files)
    % plot sex means if we have them (model6)
    % takes advantage of first and second rows are different sexes (1st=1=male, 2nd=0=female)
    if( exist([d sexModelfile],'file') )
-      ['using' sexModelfile]
+      ['using ' sexModelfile]
+      clear('intAndSlope')
       intAndSlope = csvread([d,sexModelfile],1,11);
+      if( length(find(abs(intAndSlope)>98))>0 ); disp(['found outragous values']); end
       
       %big black line with colored center
-      plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'k','LineWidth',4);
-      plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'b','LineWidth',2);
-
-      plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'k','LineWidth',4);
-      plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'r','LineWidth',2);
+      % boys
+      plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'k','LineWidth',5);
+      plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'g','LineWidth',3);
+      % girls
+      plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'k','LineWidth',5);
+      plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'y','LineWidth',3);
 
    % otherwise plot mean
    else
@@ -79,5 +90,5 @@ for i=1:length(files)
    end
       
 
-   hgexport(fig,['imgs/9-25-' rname '-matlab.eps'])
+   hgexport(fig,['imgs/9-25-' r_name '-matlab.eps'])
 end
