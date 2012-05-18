@@ -14,7 +14,8 @@
 export corrImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/AScorr-Coef_invSexIQ+tlrc"
 export  errImg="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/ASerrorCorr-Coef-PAR_lmr-invSexIQ+tlrc"
 export  errDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_err+tlrc"
-export  corDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_v2.Rdata+tlrc"
+export  corDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_corr+tlrc"
+#export  corDev="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/invAgeIQslopeAndIntTest_v2.Rdata+tlrc"
 #  p .001
 #thres=3.375
 #clustsize=13
@@ -92,6 +93,9 @@ function calcandcluster {
      # where is this cluster centered
      iam=$(whereami $xyz| grep -A1 'Atlas CA_ML_18_MNIA: Macro Labels (N27)'|sed -ne 's/Focus point://;s/ //g; 2p')
      writeprefix="$indv/cluster$n-$iam.nii.gz"
+
+     # recorder center in text file for later
+     echo $xyz > $indv/$(basename $writeprefix .nii.gz).xyz
 
      # make a mask for just this cluster
      3dcalc -c $clustMask \
