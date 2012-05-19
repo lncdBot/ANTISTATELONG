@@ -22612,10 +22612,20 @@ ANTISTATELONG/Reliability/VGScorr_r_TestRetest+tlrc.BRIK
 ANTISTATELONG/Reliability/VGScorr_r_TestRetest+tlrc.HEAD
 ANTISTATELONG/Renamed_2011_06_10.txt
 ANTISTATELONG/renameFiles.bash
-ANTISTATELONG/ROIHLM/csv/Data302_9to26_20120504_wExtra_REML_resfile2_ageC_PPC_L.csv
-ANTISTATELONG/ROIHLM/csv/Data302_9to26_20120504_wExtra_REML_resfile2_ageC_putamen_L.csv
-ANTISTATELONG/ROIHLM/csv/Data302_9to26_20120504_wExtra_REML_resfile2_ageC_putamen_R.csv
-ANTISTATELONG/ROIHLM/csv/Data302_9to26_20120504_wExtra_REML_resfile2_invageC_PPC_R.csv
+ANTISTATELONG/ROIHLM/csv/ageC_insula_L.csv
+ANTISTATELONG/ROIHLM/csv/ageC_insula_R.csv
+ANTISTATELONG/ROIHLM/csv/ageC_PPC_L.csv
+ANTISTATELONG/ROIHLM/csv/ageC_putamen_L.csv
+ANTISTATELONG/ROIHLM/csv/ageC_putamen_R.csv
+ANTISTATELONG/ROIHLM/csv/ageC_SEF.csv
+ANTISTATELONG/ROIHLM/csv/invageC_FEF_R.csv
+ANTISTATELONG/ROIHLM/csv/invageC_FEF_R_Model6.csv
+ANTISTATELONG/ROIHLM/csv/invageC_PPC_R.csv
+ANTISTATELONG/ROIHLM/csv/invageC_PPC_R_Model6.test.csv
+ANTISTATELONG/ROIHLM/csv/invageC_preSMA.csv
+ANTISTATELONG/ROIHLM/csv/invageC_preSMA_Model6.csv
+ANTISTATELONG/ROIHLM/csv/invageC_vlPFC_R.csv
+ANTISTATELONG/ROIHLM/csv/invageC_vlPFC_R_Model6.csv
 ANTISTATELONG/ROIHLM/imgs/9-25-age_putamen_L-matlab.eps
 ANTISTATELONG/ROIHLM/imgs/9-25-age_putamen_L-matlab.png
 ANTISTATELONG/ROIHLM/imgs/9-25-ageC_insula_L-matlab.eps
@@ -22652,6 +22662,7 @@ ANTISTATELONG/ROIHLM/imgs/ROIHLMgraphs.zip
 ANTISTATELONG/ROIHLM/imgs/vlPFC-RModel6.eps
 ANTISTATELONG/ROIHLM/imgs/vlPFC-RModel6.png
 ANTISTATELONG/ROIHLM/plotData.m
+ANTISTATELONG/ROIHLM/prepareImgs.bash
 ANTISTATELONG/ROIs/.DS_Store
 ANTISTATELONG/ROIs/2012_04_03_applySpheres_VGScorr.txt
 ANTISTATELONG/ROIs/acc_ri_z_FDR_032112_4393 (1).nii.gz
@@ -23328,6 +23339,7 @@ ANTISTATELONG/ROIs/Data/dani_scripts/DaniAdultLevels/.heatmap_for_sarah.R.swp
 ANTISTATELONG/ROIs/Data/dani_scripts/DaniAdultLevels/heatmap_for_sarah.R
 ANTISTATELONG/ROIs/Data/dani_scripts/DaniAdultLevels/table_scripts020812.R
 ANTISTATELONG/ROIs/Data/dani_scripts/Data_20120505.RData
+ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/heatmap.png
 ANTISTATELONG/ROIs/Data/dani_scripts/linked312_20120504_copy.txt
 ANTISTATELONG/ROIs/Data/dani_scripts/linked9to26_20120504_copy.txt
 ANTISTATELONG/ROIs/Data/dani_scripts/NOTE_forDani.txt
@@ -23642,6 +23654,7 @@ ANTISTATELONG/test
 ANTISTATELONG/test.png
 ANTISTATELONG/test.txt
 ANTISTATELONG/testtestsets
+ANTISTATELONG/VoxelwiseHLM/.3-extratROIimages.bash.swp
 ANTISTATELONG/VoxelwiseHLM/.3-sortB1Sign.bash.swp
 ANTISTATELONG/VoxelwiseHLM/.autoafni.src.bash.swp
 ANTISTATELONG/VoxelwiseHLM/.DS_Store
