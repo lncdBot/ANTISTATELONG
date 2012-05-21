@@ -3,13 +3,16 @@
 # need 
 # * path, pathOut, m
 # e.g. 
-#  path    <- "/Volumes/Governator/ANTISTATELONG/ROIs/Data/dani_scripts/analysis/20120508/brain_regDiag"
-#  m       <- 2 # model type, 2 is regular brain analyses
-#  pathOut <- "/Volumes/Governator/ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/"
+  path    <- "/Volumes/Governator/ANTISTATELONG/ROIs/Data/dani_scripts/analysis/20120508/brain_noExc"
+  m       <- 2 # model type, 2 is regular brain analyses
+  pathOut <- "/Volumes/Governator/ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/"
 
 ## note: bootstrapped pvals (pboot) may make more sense but are less smooth and hence don't look as pretty. your call.
 ## note 2: for age*behavior interaction, use pred.cor.d.p
 pvalsTbl <- read.table(file.path( paste(path, m, "deriv", "tables", "pred.d.p", sep="/") ), header=TRUE)
+#model 2 (age)
+#pvalsTbl <- read.table(file.path( paste(path, m, "deriv", "tables", "pred.d.cor.p", sep="/") ), header=TRUE)
+#model 7-10 (age by behave)
 
 ## names of variables
 ynames <- names(pvalsTbl)[-1]
@@ -26,7 +29,7 @@ pvals <- as.matrix(pvalsTbl[, -1])
 pvals <- sapply(1:dim(pvals)[2], function(c) ifelse(pvals[,c]<0.001, 0.001, pvals[,c]))
 
 ## make image
-filename <- "heatmap" ## or whatever you want to call it
+filename <- "heatmap-age" ## or whatever you want to call it
 
 ## default png resolution is 480x480 pixels, i like this resolution 
 png(file.path(pathOut, paste(filename, "png", sep=".")), width=960, height=960)
