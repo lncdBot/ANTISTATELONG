@@ -1,0 +1,26 @@
+0. movieHLM_everyone/parellel + tonifti Rscripts
+1. maskExtreme.sh      -- put max number in voxels that are too big -- makes prettyer pictures
+2. driveMove.sh        -- drive suma and afni to make images for position,hemisphere, and age
+3. makeMovie.sh        -- convert still images into movies
+4. makeConcatStills.sh -- 2x3 grid of brains row 1 = no thres; row 2 =  2.86 thres left, right, top
+
+# Everyone
+# input from ./movieHLM_everyone.R -t -n inputnii/AScorr-Coef.nii -d inputData/Data302_9to26_20120504.dat -p Rdata/Corr_everyone_8_26.RData
+# and to_nifity
+./maskExtreme.sh -i Corr_everyone_8_26+tlrc
+./driveMove.sh -t 0    -i adjusted/Corr_everyone_8_26_thres+tlrc
+./driveMove.sh -t 2.86 -i adjusted/Corr_everyone_8_26_thres+tlrc
+
+# Male/Female
+# input from ./movieHLM_parallel.R  -n inputnii/AScorr-Coef.nii -d inputData/Data302_9to26_20120504.dat -p Rdata/Corr_MF_8_26.RData
+# and to_nifity
+./maskExtreme.sh -i Corr_MF_8_26+tlrc
+./driveMove.sh -t 0    -i adjusted/Corr_MF_8_26_thres+tlrc
+./driveMove.sh -t 2.86 -i adjusted/Corr_MF_8_26_thres+tlrc
+
+
+# make movie
+./makeMovie.sh
+
+# make composit images
+./makeConcatStills.sh
