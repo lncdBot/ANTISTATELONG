@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
 
+# look at no slope and no random with devience test (chi square > 3.84) 
+# to create three masks: slopeSig, intSig, bothSig
+#
+# create masks for t2-t5 > 2.86 (sex slope/int and iq slop/int)
+#
+# find clusters for all combinations of these two mask sets
+#
+
     root="/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/HLMimages/"
     root="$HOME/src/ANTISTATELONG/VoxelwiseHLM/HLMimages/"
   errDev="$root/invAgeIQslopeAndIntTest_err+tlrc"
@@ -55,9 +63,11 @@ for Dev in $errDev $corDev; do
   prefix=sigSlope_mask
 
   3dcalc -s "$Dev[invAgeSlopeNull.Deviance]" \
+         -i "$Dev[invAgeNoRand.Deviance]" \
          -d "$Dev[invAgeSexIQ.Deviance]" \
-         -expr  "step(abs(d-s)-$chithres)" \
+         -expr  "ispositive(abs(d-s)-$chithres) * isnegative(abs(d-i)-$chithres)" \
          -overwrite -prefix $outdir/$prefix
+         #-expr  "ispositive(abs(d-s)-$chithres)" \
 
   clust $outdir $prefix
 
@@ -66,9 +76,10 @@ for Dev in $errDev $corDev; do
   # Intercept 
   prefix=sigIntrcpt_mask
 
-  3dcalc -i "$Dev[invAgeNoRand.Deviance]" \
+  3dcalc -s "$Dev[invAgeSlopeNull.Deviance]" \
+         -i "$Dev[invAgeNoRand.Deviance]" \
          -d "$Dev[invAgeSexIQ.Deviance]" \
-         -expr  "step(abs(d-i)-$chithres)" \
+         -expr  "isnegative(abs(d-s)-$chithres) * ispositive(abs(d-i)-$chithres)" \
          -overwrite -prefix $outdir/$prefix
 
   clust $outdir $prefix
@@ -77,10 +88,11 @@ for Dev in $errDev $corDev; do
   #######
   # Both
   prefix=sigIntrcptSigSlop_mask
-  3dcalc -a "$outdir/sigIntrcpt_mask+tlrc" \
-         -b "$outdir/sigSlope_mask+tlrc" \
-         -expr  "a*b" \
-         -overwrite -prefix "$outdir/$prefix"
+  3dcalc -s "$Dev[invAgeSlopeNull.Deviance]" \
+         -i "$Dev[invAgeNoRand.Deviance]" \
+         -d "$Dev[invAgeSexIQ.Deviance]" \
+         -expr  "ispositive(abs(d-s)-$chithres) * ispositive(abs(d-i)-$chithres)" \
+         -overwrite -prefix $outdir/$prefix
 
   clust $outdir $prefix
 
@@ -130,10 +142,10 @@ s/Intrcpt_mask/1\t0\t/;
 s/Slope_mask/0\t1\t/;
 s/IntrcptSigSlop_mask/1\t1\t/;
 s/VS//;
-s/t2_mask.clusts/1\t0\t0\t0/;
-s/t4_mask.clusts/0\t1\t0\t0/;
-s/t3_mask.clusts/0\t0\t1\t0/;
-s/t5_mask.clusts/0\t0\t0\t1/;
+s/t2_mask.clusts/1\t-\t-\t-/;
+s/t4_mask.clusts/-\t1\t-\t-/;
+s/t3_mask.clusts/-\t-\t1\t-/;
+s/t5_mask.clusts/-\t-\t-\t1/;
 " | while read x y z rest; do 
    echo -ne "$x\t$y\t$z\t$rest\t"
    whereami $x $y $z 2>/dev/null | grep -A1 'Atlas CA_ML_18_MNIA: Macro Labels (N27)'|sed -ne 's/Focus point://;s/ //g; 2p'; 
