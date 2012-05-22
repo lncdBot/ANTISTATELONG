@@ -103,7 +103,7 @@ DriveSuma -com recorder_cont -viewer_size 800 600
 twohem=1
 
 for face in "top" "left" "right"; do
-   for sex in "male" "female" "everyone"; do 
+   for sex in "male" "female" "everyone" "M-F"; do 
 
       # #####
       # what keys to we push to get orientation right
