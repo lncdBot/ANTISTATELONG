@@ -172,7 +172,7 @@ for i=1:length(files)
    %%%%%%%%%%%%%%%%%%%%
    % with just a dash
    %%%%%%%%%%%%%%%%%%%
-   fig=figure; hold on;  %ylim([-.05 .15 ])
+   fig=figure; hold on;  xlim([9 25]); %ylim([-.05 .15 ])
 
    % labeling and title
    xlabel('Age'); ylabel('% Signal Change'); title(rname);
