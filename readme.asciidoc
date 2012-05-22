@@ -1,0 +1,29 @@
+
+== Reliability/ROI_r.tsv
+
+reliability of rois (mean,min,max,std)
+
+TODO: dACC_10_ASerrCorr_r is too low (why?)
+
+
+
+== ROIHLM/
+
+plots of % signal change for ROIs (mixed model; Hierarchical linear models)
+
+TODO: Alatcorr_invageC values are way too large
+
+
+
+== ROIs/Data/dani_scripts/  
+
+heatmap and tables from Dani's omnibus analysis
+
+
+
+== VoxelwiseHLM/            
+=== VoxelwiseHLM/HLMimages/  
+
+afni file results
+
+TODO: difference in unthres'ed age
