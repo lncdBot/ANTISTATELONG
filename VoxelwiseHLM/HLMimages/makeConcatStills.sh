@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 for sex in "male" "female" "everyone"; do
+#for sex in "M-F"; do #also comment out +append thres2.86
  outdir=movieStills/composite/$sex/
  [ -d $outdir ] || mkdir -p $outdir
  for img in {1..19}; do

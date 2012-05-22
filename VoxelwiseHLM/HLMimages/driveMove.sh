@@ -132,13 +132,24 @@ for face in "top" "left" "right"; do
       [ -d $savedir ] || mkdir -p $savedir
       imgname=$savedir/${face}View
       # ###########################
+      # hack: M-F has no t0, so define $t to be b for M-F
+      # this means perl regexp is (b|b) and there is always a new line printed
+      # and bash read never fills tIdx and agehold
+
+      t="t"
+      [ "$sex" == "M-F" ] && t="b"
+
+      # ###########################
       # read all the sub bricks
       # put p0 on the same line a t0
       # read in
       3dinfo -verb $t2Image 2>/dev/null | 
       grep sub- |sed -e "s/'//g" | awk '{print $5, $4}'|sort -n | awk '{print $2, $1}' | # super hacky way to get format sorted like before
-      perl -ne "print \$1,' ', \$2,  \$3 eq 't'?qq{\n}:' ' if /#(\d+) (\d+).$sex.(b|t)0/" | 
-      while read bIdx age tIdx age; do
+      perl -ne "print \$1,' ', \$2,  \$3 eq '$t'?qq{\n}:' ' if /#(\d+) (\d+).$sex.(b|$t)0/" | 
+      while read bIdx age tIdx agehold; do
+         #
+         # no tIdx for sex=M-F, set to -1
+         [ -z "$tIdx" ] && tIdx=-1;
          # display age and sex
          writeNIML  "$sex $age"
          DriveSuma -com viewer_cont -load_do text.niml.do
