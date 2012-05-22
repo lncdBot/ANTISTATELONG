@@ -119,7 +119,7 @@ for i=1:length(files)
    % get region name -- csv files have been renamed to make this easy
    r_name=name(1:end-4);                  % remove extension, now have ageC_insula_L
    rname = regexprep(r_name,'_',' ');     % remove _
-   rname = regexprep(rname,'ageC','age'); % remove C
+   rname = regexprep(rname,'(inv)?ageC(sq)?',''); % remove age
 
    % plot
    fig=figure; hold on; xlim([9 25]); %ylim([-.05 .15 ])
