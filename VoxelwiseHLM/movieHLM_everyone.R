@@ -148,7 +148,7 @@ agesToCenter    <- c(8:26)
 ############  All the info we want ####################3
 # create a column for each "type" of output we're interested in
 #,"AIC","Deviance","ResStdErr","R2" )
-ageSexcombs <- expand.grid(agesToCenter,c("male","female"))
+ageSexcombs <- expand.grid(agesToCenter,c("everyone"))
 ageSexcombs <- apply(ageSexcombs,1,paste,collapse=".")
 ageSexcombs <- sub(' ','', ageSexcombs) # " 9..." to "9.."
 typelist <- list(
@@ -165,7 +165,6 @@ typelist <- list(
     )
    ,sep="."))
 )
-
 
 # set type (type like "i" or invAge.b0 ) to all NA 
 for ( type in unlist(typelist) ) {  
@@ -229,8 +228,10 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
         locDemInfo$invageC <- (actualAge - invCenter)
 
         # add model to list
-        nlmeLin[[paste(newcenter,"female",sep=".")]] <- lme(Beta ~ invageC + sexMref,random =~ invageC | LunaID, data=locDemInfo, control=c)
-        nlmeLin[[paste(newcenter,"male",  sep=".")]] <- lme(Beta ~ invageC + sexNum, random =~ invageC | LunaID, data=locDemInfo, control=c)
+        #nlmeLin[[paste(newcenter,"female",sep=".")]]<- lme(Beta ~ invageC + sexMref,random =~ invageC | LunaID, data=locDemInfo, control=c)
+        #lmeLin[[paste(newcenter,"male",  sep=".")]] <- lme(Beta ~ invageC + sexNum, random =~ invageC | LunaID, data=locDemInfo, control=c)
+
+        nlmeLin[[paste(newcenter,"everyone",sep=".")]] <- lme(Beta ~ invageC + sex55,random =~ invageC | LunaID, data=locDemInfo, control=c)
         # cant use below for male/female only -- sex55 is same for all
         #nlmeLin[[newcenter]] <- lme(Beta ~ invageC + sex55 + sex55:invageC, random =~ invageC | LunaID, data=locDemInfo, control=c)
      }
@@ -247,6 +248,7 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
          ) 
     #keep single row a list of nans
     singleRow$badVoxel <- 1
+    warnings()
     return(singleRow)
   }
 
@@ -256,7 +258,7 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
   # for each type and it's index (p->5, t->4, b->1)
   #  add as many values of that type to singleRow eg for nlme4a3 add b0 b1 and b2
   for (newcenter in agesToCenter) { 
-   for (sex in c("male","female") ) { 
+   for (sex in c("everyone") ) { 
      mName <- paste(newcenter,sex,sep=".")     # model name
      mSumm <- summary(nlmeLin[[mName]])    # model summary
 
@@ -289,6 +291,7 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {
      singleRow[nameIdxs] <-  vals[1:(len-1)]
    }
   }
+
 
   # check everything is as it should be before sending off the data
   thisLen     <- length(singleRow)

@@ -14,7 +14,7 @@ for i in *eps; do convert $i $(basename $i .eps).png; done
 
 # zip all images up
 zipfile=ROIHLMgraphs.zip
-[ -r $zipfile] && rm $zipfile
+[ -r $zipfile ] && rm $zipfile
 zip $zipfile *eps *png
 
 # send to arnold
