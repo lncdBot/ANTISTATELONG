@@ -5,6 +5,11 @@ invAgeC     = [ 0.051 0.040 0.031 0.024 0.017 0.012 0.007 0.003 -0.001 -0.004 -0
 AgeC        = [-7.726 -6.726 -5.726 -4.726 -3.726 -2.726 -1.726 -0.726 0.274 1.274 2.274 3.274 4.274 5.274 6.274 7.274 8.274 ]; 
 AgeCsq      = AgeC.^2;
 
+ageCm    = 16.7;
+invageCm = 1/ageCm;
+ageCsqm  = ageCm^2;
+
+
 % for all the files in the csv dir
 d='csv_parallel/';
 %files=dir(d);
@@ -43,13 +48,13 @@ for i=1:length(files)
 
    % set x based on file name (inv or not)
    if(regexp(name,'invage'))
-      x=invAgeC;
+      x=invAgeC; mean_x=invageCm;
       type='invage';
    elseif(regexp(name,'ageCsq'))
-      x=AgeCsq;
+      x=AgeCsq; mean_x=ageCsqm;
       type='agecsq';
    else
-      x=AgeC;
+      x=AgeC;  mean_x=ageCm;
       type='agec';
    end
 
@@ -128,7 +133,7 @@ for i=1:length(files)
    xlabel('Age'); ylabel('% Signal Change'); title(rname);
 
    % check that sex is right
-   disp(['plotting file '  name]);
+   disp(['plotting file '  name ' as ' type]);
 
    for i=1:length(intAndSlope)
     color = 'r';                                    % everyone is red
@@ -161,6 +166,26 @@ for i=1:length(files)
    %   plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'k','LineWidth',4);
    %end
       
-
    hgexport(fig,['imgs_parallel/9-25-' r_name '.eps'])
+
+
+   %%%%%%%%%%%%%%%%%%%%
+   % with just a dash
+   %%%%%%%%%%%%%%%%%%%
+   fig=figure; hold on;  %ylim([-.05 .15 ])
+
+   % labeling and title
+   xlabel('Age'); ylabel('% Signal Change'); title(rname);
+
+   plot(9:25, mean(intAndSlope(:,intIdx)) + x * mean(intAndSlope(:,sloIdx)), 'k');
+
+   for i=1:length(intAndSlope)
+    color = 'r';                                    % everyone is red
+    if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
+    
+    % plot this person
+    plot(ageCm, intAndSlope(i,intIdx) + mean_x * intAndSlope(i,sloIdx), ['.' color]);
+   end
+
+   hgexport(fig,['imgs_parallel/9-25-meanWithDash-' r_name '.eps'])
 end
