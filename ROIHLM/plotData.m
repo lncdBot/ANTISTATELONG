@@ -1,3 +1,5 @@
+% big title and plot
+set(0, 'DefaultAxesFontSize',20)
 invAgeC     = [ 0.051 0.040 0.031 0.024 0.017 0.012 0.007 0.003 -0.001 -0.004 -0.007 -0.010 -0.012 -0.014 -0.016 -0.018 -0.020];
 % 9:26-16.726
 AgeC        = [-7.726 -6.726 -5.726 -4.726 -3.726 -2.726 -1.726 -0.726 0.274 1.274 2.274 3.274 4.274 5.274 6.274 7.274 8.274 ]; 
@@ -55,7 +57,7 @@ for i=1:length(files)
    xlabel('Age'); ylabel('% Signal Change'); title(rname);
 
    % check that sex is right
-    name
+    disp(['plotting ' name])
    % intAndSlope(1:10,sexIdx) 
 
    for i=1:length(intAndSlope)
@@ -71,7 +73,7 @@ for i=1:length(files)
    % plot sex means if we have them (model6)
    % takes advantage of first and second rows are different sexes (1st=1=male, 2nd=0=female)
    if( exist([d sexModelfile],'file') )
-      ['using ' sexModelfile]
+      disp(['  using ' sexModelfile])
       clear('intAndSlope')
       intAndSlope = csvread([d,sexModelfile],1,11);
       if( length(find(abs(intAndSlope)>98))>0 ); disp(['found outragous values']); end
@@ -90,5 +92,5 @@ for i=1:length(files)
    end
       
 
-   hgexport(fig,['imgs/9-25-' r_name '-matlab.eps'])
+   hgexport(fig,['imgs/9-25-' r_name '.eps'])
 end
