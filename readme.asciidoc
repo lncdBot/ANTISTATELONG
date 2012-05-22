@@ -3,7 +3,8 @@
 
 reliability of rois (mean,min,max,std)
 
-NOTE: TODO dACC_10_ASerrCorr_r is too low (why?)
+[CAUTION]
+TODO dACC_10_ASerrCorr_r is too low (why?)
 
 
 
@@ -11,7 +12,8 @@ NOTE: TODO dACC_10_ASerrCorr_r is too low (why?)
 
 plots of % signal change for ROIs (mixed model; Hierarchical linear models)
 
-NOTE: TODO Alatcorr_invageC values are way too large
+[CAUTION]
+TODO Alatcorr_invageC values are way too large
 
 
 
@@ -26,4 +28,5 @@ heatmap and tables from Dani's omnibus analysis
 
 afni file results
 
-NOTE: TODO difference in unthres'ed age
+[CAUTION]
+TODO difference in unthres'ed age
