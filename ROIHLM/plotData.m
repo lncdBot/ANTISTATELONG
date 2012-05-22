@@ -57,7 +57,7 @@ for i=1:length(files)
    xlabel('Age'); ylabel('% Signal Change'); title(rname);
 
    % check that sex is right
-    name
+    disp(['plotting ' name])
    % intAndSlope(1:10,sexIdx) 
 
    for i=1:length(intAndSlope)
@@ -73,7 +73,7 @@ for i=1:length(files)
    % plot sex means if we have them (model6)
    % takes advantage of first and second rows are different sexes (1st=1=male, 2nd=0=female)
    if( exist([d sexModelfile],'file') )
-      ['using ' sexModelfile]
+      disp(['  using ' sexModelfile])
       clear('intAndSlope')
       intAndSlope = csvread([d,sexModelfile],1,11);
       if( length(find(abs(intAndSlope)>98))>0 ); disp(['found outragous values']); end
@@ -92,5 +92,5 @@ for i=1:length(files)
    end
       
 
-   hgexport(fig,['imgs/9-25-' r_name '-matlab.eps'])
+   hgexport(fig,['imgs/9-25-' r_name '.eps'])
 end
