@@ -7,7 +7,19 @@ AgeCsq      = AgeC.^2;
 
 % for all the files in the csv dir
 d='csv_parallel/';
-files=dir(d);
+%files=dir(d);
+% specify order so sexnum is built
+files= { 
+  'dlPFC_L_invageC.csv'      ...
+  'Alatcorr_invageC.csv'     ...
+  'dACC10corr_invageC.csv'   ...
+  'dACC10win3sd_invageC.csv' ...
+  'dlPFC_R_invageC.csv'      ...
+  'FEF_L_ageCsq.csv'         ...
+  'Vlatcorr_invageC.csv'     ...
+  'vlPFC_L_invageC.csv'      ...
+  'ASpErr_invageC.csv'       ...
+};
 % csv file rows
 
 %meanIntIdx   = 1; %           as fvintrcp
@@ -15,13 +27,15 @@ files=dir(d);
 %intIdx = 3;       % intercept as ecintrcp
 %sloIdx = 4;       % slope     as ecinvage
 %sexIdx = 11;      % sex       as sexnum
+sexColumnBack =[];
 
 for i=1:length(files)
 
 
    % find the csvs or skip to next file
    % skip any like *6.csv (don't use model6)
-   name=files(i).name;
+   %name=files(i).name;
+   name=files{i};
    if(   length( regexp(name,'[^6].csv$') ) == 0  )
       continue
    end
@@ -40,17 +54,30 @@ for i=1:length(files)
    end
 
     
+   % open file, skip the first row but don't ignore any columns
+   clear('intAndSlope')
+   intAndSlope = csvread([d, name],1,0);
 
    % get header
    fid    = fopen([d,name],'r');  
    header = textscan(fid,'%s',1,'delimiter','\n'); 
    headerCell = regexp(header{1},',','split');
+
+   % set indexes
    meanIntIdx   = find(cellfun(@isempty, strfind(headerCell{:},'fvintrcp')) ~= 1);
    meanSlopeIdx = find(cellfun(@isempty, strfind(headerCell{:},['fv' type])) ~= 1); 
    intIdx       = find(cellfun(@isempty, strfind(headerCell{:},'ecintrcp')) ~= 1); 
    sloIdx       = find(cellfun(@isempty, strfind(headerCell{:},['ec' type])) ~= 1); 
    sexIdx       = find(cellfun(@isempty, strfind(headerCell{:},'sex')  ) ~= 1); 
-   
+
+   % set sex if missing
+   if(    ( isempty(sexIdx) || strcmpi(headerCell{:}(sexIdx(1)),'sex55iqc')) ...
+       && length(sexColumnBack)==length(intAndSlope) )
+    intAndSlope=[intAndSlope,sexColumnBack];
+    sexIdx=size(intAndSlope);
+    sexIdx=sexIdx(2);
+   end 
+
    % check for missing columns
    columns={'meanIntIdx','meanSlopeIdx','intIdx','sloIdx','sexIdx'};
    missingColumns=find(cellfun(@isempty,{meanIntIdx,meanSlopeIdx,intIdx,sloIdx,sexIdx}));
@@ -60,9 +87,6 @@ for i=1:length(files)
      continue
    end
 
-   % open file, skip the first row but don't ignore any columns
-   clear('intAndSlope')
-   intAndSlope = csvread([d, name],1,0);
 
 
    % deal with sex column ambiquity
@@ -71,7 +95,7 @@ for i=1:length(files)
 
    % are there only two values, otherwise skip
    if(length(s)~=2)
-      s = headerCell{:}(sexIdx);
+      s = headerCell{:}(sexIdx(1));
       disp(['skipping ' name])
       disp([ num2str(sexIdx) ' is not a sex column: ' s(1)]);
       continue
@@ -80,7 +104,7 @@ for i=1:length(files)
    % if there are two but it's sex55, change to sexnum
    if(length(find(s == -.5))); intAndSlope(:,sexIdx) = intAndSlope(:,sexIdx) + .5; end
 
-
+   sexColumnBack = intAndSlope(:,sexIdx);
    % check for 99's
    for i=[meanIntIdx, meanSlopeIdx,intIdx,sloIdx,sexIdx]
       naIdx = find(abs(intAndSlope(:,i))==99);
