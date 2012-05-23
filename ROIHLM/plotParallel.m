@@ -129,6 +129,9 @@ for i=1:length(files)
    if (regexp(rname,'lat'))
       ylab='Latency (ms)';
       yl=[300 700];
+   elseif (regexp(rname,'Err'))
+      ylab='% Errors';
+      yl=[0 1];
    else
       ylab='% Signal Change'; 
       yl=[-.05 .15];
