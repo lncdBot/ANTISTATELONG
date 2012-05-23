@@ -41,28 +41,28 @@ for i=1:length(files)
       continue
    end
 
+   % get region name -- csv files have been renamed to make this easy
+   r_name=name(1:end-4);                  % remove extension, now have ageC_insula_L
+   rname = regexprep(r_name,'_',' ');     % remove _
+   rname = regexprep(rname,'(inv)?ageC(sq)?',''); % remove age
 
-   % set x based on file name (inv or not)
-   if(regexp(name,'invage'))
-      plotx=invAgeC;
-      type='invage';
-   elseif(regexp(name,'ageCsq'))
-      plotx=AgeCsq;
-      type='agecsq';
-   else
-      plotx=AgeC;  
-      type='agec';
-   end
-
-    
-   % open file, skip the first row but don't ignore any columns
-   clear('intAndSlope')
-   intAndSlope = csvread([d, name],1,0);
 
    % get header
    fid    = fopen([d,name],'r');  
    header = textscan(fid,'%s',1,'delimiter','\n'); 
    headerCell = regexp(header{1},',','split');
+
+
+
+   % what type are we dealing with
+   if(regexp(name,'invage'))      type='invage';
+   elseif(regexp(name,'ageCsq'))  type='agecsq';
+   else                           type='agec';    end
+
+    
+   % open file, skip the first row but don't ignore any columns
+   clear('intAndSlope')
+   intAndSlope = csvread([d, name],1,0);
 
    % set indexes
    meanIntIdx   = find(cellfun(@isempty, strfind(headerCell{:},'fvintrcp')) ~= 1);
@@ -87,7 +87,6 @@ for i=1:length(files)
      disp(columns{missingColumns})
      continue
    end
-
 
 
    % deal with sex column ambiquity
@@ -115,17 +114,31 @@ for i=1:length(files)
       end
    end
 
+   % set mean, and get middle term for sq
+   if(regexp(name,'invage'))
+      yaxis_mean = intAndSlope(1,meanIntIdx) + invAgeC * intAndSlope(1,meanSlopeIdx);
+      xplot      = invAgeC;
+
+   elseif(regexp(name,'ageCsq'))
+          bIdx   = find(cellfun(@isempty, strfind(headerCell{:},'ebagec')) ~= 1);
+      meanbIdx   = find(cellfun(@isempty, strfind(headerCell{:},'fvagec')) ~= 1);
+      bIdx=bIdx(1);
+      meanbIdx=meanbIdx(1);
+      yaxis_mean = AgeCsq * intAndSlope(1,meanSlopeIdx) + AgeC * intAndSlope(1,meanbIdx) + intAndSlope(1,meanIntIdx);
+      xplot      = AgeCsq;
+   else
+      yaxis_mean = intAndSlope(1,meanIntIdx) + AgeC* intAndSlope(1,meanSlopeIdx);
+      xplot      = AgeC;
+   end
 
 
-   % get region name -- csv files have been renamed to make this easy
-   r_name=name(1:end-4);                  % remove extension, now have ageC_insula_L
-   rname = regexprep(r_name,'_',' ');     % remove _
-   rname = regexprep(rname,'(inv)?ageC(sq)?',''); % remove age
 
-   % plot
+
+   % plot labels
    fig=figure; hold on; 
-
    xlab='Age'; xaxis=9:25;
+
+   % latency, % errors, or % signal
    if (regexp(rname,'lat'))
       ylab='Latency (ms)';
       yl=[300 700];
@@ -141,17 +154,32 @@ for i=1:length(files)
    xlabel(xlab);ylabel(ylab); title(rname);
    xlim([min(xaxis),max(xaxis)]);ylim(yl);
    
-   % check that sex is right
+   % report what file we are on
    disp(['plotting file '  name ' as ' type]);
+
+
+   %%%%%%%%%%% begin plotting
+
 
    for i=1:length(intAndSlope)
     color = 'r';                                    % everyone is red
     if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
     
     % plot this person
-    plot(xaxis, intAndSlope(i,intIdx) + plotx * intAndSlope(i,sloIdx), color);
+    yaxis =  xplot * intAndSlope(i,sloIdx)  + intAndSlope(i,intIdx);
+
+    % extra term for square
+    if(type=='agecsq')
+       yaxis = yaxis + AgeC * intAndSlope(i,bIdx);   
+    end
+    plot(xaxis, yaxis, color);
+
    end
 
+   % plot mean
+   plot(xaxis, yaxis_mean, 'k', 'LineWidth',4);
+
+   % save figure with _ delim roi_modelType
    hgexport(fig,['imgs_parallel/9-25-' r_name '.eps'])
 
 
@@ -165,16 +193,24 @@ for i=1:length(files)
    xlabel(xlab);ylabel(ylab); title(rname);
    xlim([min(xaxis),max(xaxis)]);ylim(yl);
 
-   plot(xaxis, intAndSlope(1,meanIntIdx) + plotx * intAndSlope(1,meanSlopeIdx), 'k');
-   disp(['   int   ' num2str(intAndSlope(1,meanIntIdx))])
-   disp(['   slope ' num2str(intAndSlope(1,meanSlopeIdx))])
+   % plot mean
+   plot(xaxis, yaxis_mean, 'k', 'LineWidth',4);
 
+   % print things we can check
+   %disp(['   int   ' num2str(intAndSlope(1,meanIntIdx))])
+   %disp(['   slope ' num2str(intAndSlope(1,meanSlopeIdx))])
+
+   % for each person, put a point at the mean
    for i=1:length(intAndSlope)
+    % add a little random jitter
+    %jitter=(randi(12,1,1) - 6)*1/24;  % random [-.25 .. +.25] 
+    jitter=randn(1,1,1)/4;  % random [-.25 .. +.25] 
+
     color = 'r';                                    % everyone is red
     if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
     
     % plot this person
-    plot(16.7, intAndSlope(i,intIdx), ['x' color]);
+    plot(16.7+jitter, intAndSlope(i,intIdx), ['x' color]);
    end
 
    hgexport(fig,['imgs_parallel/9-25-meanWithDash-' r_name '.eps'])
