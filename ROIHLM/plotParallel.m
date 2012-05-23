@@ -5,10 +5,6 @@ invAgeC     = [ 0.051 0.040 0.031 0.024 0.017 0.012 0.007 0.003 -0.001 -0.004 -0
 AgeC        = [-7.726 -6.726 -5.726 -4.726 -3.726 -2.726 -1.726 -0.726 0.274 1.274 2.274 3.274 4.274 5.274 6.274 7.274 8.274 ]; 
 AgeCsq      = AgeC.^2;
 
-ageCm    = 16.7;
-invageCm = 1/ageCm;
-ageCsqm  = ageCm^2;
-
 
 % for all the files in the csv dir
 d='csv_parallel/';
@@ -48,13 +44,13 @@ for i=1:length(files)
 
    % set x based on file name (inv or not)
    if(regexp(name,'invage'))
-      x=invAgeC; mean_x=invageCm;
+      plotx=invAgeC;
       type='invage';
    elseif(regexp(name,'ageCsq'))
-      x=AgeCsq; mean_x=ageCsqm;
+      plotx=AgeCsq;
       type='agecsq';
    else
-      x=AgeC;  mean_x=ageCm;
+      plotx=AgeC;  
       type='agec';
    end
 
@@ -127,11 +123,21 @@ for i=1:length(files)
    rname = regexprep(rname,'(inv)?ageC(sq)?',''); % remove age
 
    % plot
-   fig=figure; hold on; xlim([9 25]); %ylim([-.05 .15 ])
+   fig=figure; hold on; 
 
-   % labeling and title
-   xlabel('Age'); ylabel('% Signal Change'); title(rname);
+   xlab='Age'; xaxis=9:25;
+   if (regexp(rname,'lat'))
+      ylab='Latency (ms)';
+      yl=[300 700];
+   else
+      ylab='% Signal Change'; 
+      yl=[-.05 .15];
+   end
 
+   % labeling and range
+   xlabel(xlab);ylabel(ylab); title(rname);
+   xlim([min(xaxis),max(xaxis)]);ylim(yl);
+   
    % check that sex is right
    disp(['plotting file '  name ' as ' type]);
 
@@ -140,51 +146,32 @@ for i=1:length(files)
     if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
     
     % plot this person
-    plot(9:25, intAndSlope(i,intIdx) + x * intAndSlope(i,sloIdx), color);
+    plot(xaxis, intAndSlope(i,intIdx) + plotx * intAndSlope(i,sloIdx), color);
    end
 
-   %sexModelfile = regexprep(name, '.csv$', '_Model6.csv');
-   %
-   % plot sex means if we have them (model6)
-   % takes advantage of first and second rows are different sexes (1st=1=male, 2nd=0=female)
-   %if( exist([d sexModelfile],'file') )
-   %   ['using ' sexModelfile]
-   %   clear('intAndSlope')
-   %   intAndSlope = csvread([d,sexModelfile],1,11);
-   %   if( length(find(abs(intAndSlope)>98))>0 ); disp(['found outragous values']); end
-   %   
-   %   %big black line with colored center
-   %   % boys
-   %   plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'k','LineWidth',5);
-   %   plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'g','LineWidth',3);
-   %   % girls
-   %   plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'k','LineWidth',5);
-   %   plot(9:25, intAndSlope(2,meanIntIdx) + x * intAndSlope(2,meanSlopeIdx), 'y','LineWidth',3);
-
-   %% otherwise plot mean
-   %else
-   %   plot(9:25, intAndSlope(1,meanIntIdx) + x * intAndSlope(1,meanSlopeIdx), 'k','LineWidth',4);
-   %end
-      
    hgexport(fig,['imgs_parallel/9-25-' r_name '.eps'])
 
 
    %%%%%%%%%%%%%%%%%%%%
    % with just a dash
    %%%%%%%%%%%%%%%%%%%
-   fig=figure; hold on;  xlim([9 25]); %ylim([-.05 .15 ])
+   fig=figure; hold on; 
 
    % labeling and title
-   xlabel('Age'); ylabel('% Signal Change'); title(rname);
+   % labeling and range
+   xlabel(xlab);ylabel(ylab); title(rname);
+   xlim([min(xaxis),max(xaxis)]);ylim(yl);
 
-   plot(9:25, mean(intAndSlope(:,intIdx)) + x * mean(intAndSlope(:,sloIdx)), 'k');
+   plot(xaxis, intAndSlope(1,meanIntIdx) + plotx * intAndSlope(1,meanSlopeIdx), 'k');
+   disp(['   int   ' num2str(intAndSlope(1,meanIntIdx))])
+   disp(['   slope ' num2str(intAndSlope(1,meanSlopeIdx))])
 
    for i=1:length(intAndSlope)
     color = 'r';                                    % everyone is red
     if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
     
     % plot this person
-    plot(ageCm, intAndSlope(i,intIdx) + mean_x * intAndSlope(i,sloIdx), ['.' color]);
+    plot(16.7, intAndSlope(i,intIdx), ['x' color]);
    end
 
    hgexport(fig,['imgs_parallel/9-25-meanWithDash-' r_name '.eps'])
