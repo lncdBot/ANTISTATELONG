@@ -128,13 +128,15 @@ for i=1:length(files)
    xlab='Age'; xaxis=9:25;
    if (regexp(rname,'lat'))
       ylab='Latency (ms)';
+      yl=[300 700];
    else
       ylab='% Signal Change'; 
+      yl=[-.05 .15];
    end
 
    % labeling and range
    xlabel(xlab);ylabel(ylab); title(rname);
-   xlim([min(xaxis),max(xaxis)]);
+   xlim([min(xaxis),max(xaxis)]);ylim(yl);
    
    % check that sex is right
    disp(['plotting file '  name ' as ' type]);
@@ -158,7 +160,7 @@ for i=1:length(files)
    % labeling and title
    % labeling and range
    xlabel(xlab);ylabel(ylab); title(rname);
-   xlim([min(xaxis),max(xaxis)]);
+   xlim([min(xaxis),max(xaxis)]);ylim(yl);
 
    plot(xaxis, intAndSlope(1,meanIntIdx) + plotx * intAndSlope(1,meanSlopeIdx), 'k');
    disp(['   int   ' num2str(intAndSlope(1,meanIntIdx))])
