@@ -1,8 +1,9 @@
 % big title and plot
 set(0, 'DefaultAxesFontSize',20)
-invAgeC     = [ 0.051 0.040 0.031 0.024 0.017 0.012 0.007 0.003 -0.001 -0.004 -0.007 -0.010 -0.012 -0.014 -0.016 -0.018 -0.020];
 % 9:26-16.726
 AgeC        = [-7.726 -6.726 -5.726 -4.726 -3.726 -2.726 -1.726 -0.726 0.274 1.274 2.274 3.274 4.274 5.274 6.274 7.274 8.274 ]; 
+% 1./[9:26] - 1/16.726
+invAgeC     = [ 0.051 0.040 0.031 0.024 0.017 0.012 0.007 0.003 -0.001 -0.004 -0.007 -0.010 -0.012 -0.014 -0.016 -0.018 -0.020];
 AgeCsq      = AgeC.^2;
 
 
@@ -114,10 +115,12 @@ for i=1:length(files)
       end
    end
 
+   xplot_limLab  = [-.3 .3]+16.72;
    % set mean, and get middle term for sq
    if(regexp(name,'invage'))
       yaxis_mean = intAndSlope(1,meanIntIdx) + invAgeC * intAndSlope(1,meanSlopeIdx);
       xplot      = invAgeC;
+      xplot_lim  = 1./(xplot_limLab) - 1/16.72;
 
    elseif(regexp(name,'ageCsq'))
           bIdx   = find(cellfun(@isempty, strfind(headerCell{:},'ebagec')) ~= 1);
@@ -126,9 +129,11 @@ for i=1:length(files)
       meanbIdx=meanbIdx(1);
       yaxis_mean = AgeCsq * intAndSlope(1,meanSlopeIdx) + AgeC * intAndSlope(1,meanbIdx) + intAndSlope(1,meanIntIdx);
       xplot      = AgeCsq;
+      xplot_lim  = (xplot_limLab-16.72).^2
    else
       yaxis_mean = intAndSlope(1,meanIntIdx) + AgeC* intAndSlope(1,meanSlopeIdx);
       xplot      = AgeC;
+      xplot_lim  = xplot_limLab-16.72
    end
 
 
@@ -204,13 +209,24 @@ for i=1:length(files)
    for i=1:length(intAndSlope)
     % add a little random jitter
     %jitter=(randi(12,1,1) - 6)*1/24;  % random [-.25 .. +.25] 
-    jitter=randn(1,1,1)/4;  % random [-.25 .. +.25] 
+    jitter=randn(1,1,1)/4;  % normally distributed around 1, /4
 
     color = 'r';                                    % everyone is red
     if (intAndSlope(i,sexIdx) == 1); color='b'; end % unless male, then blue
     
     % plot this person
-    plot(16.7+jitter, intAndSlope(i,intIdx), ['x' color]);
+    %plot(16.7+jitter, intAndSlope(i,intIdx), ['x' color]);
+    %plot(16.7, intAndSlope(i,intIdx), ['x' color]);
+    % make a dash
+    %plot([16.6,16.8], [1,1].*intAndSlope(i,intIdx), ['-' color]);
+
+    % plot this person for only a very small bit
+    yaxis =  xplot_lim * intAndSlope(i,sloIdx)  + intAndSlope(i,intIdx);
+    % extra term for square
+    if(type=='agecsq')
+       yaxis = yaxis + (xplot_limLab-16.72) * intAndSlope(i,bIdx);   
+    end
+    plot(xplot_limLab, yaxis, color);
    end
 
    hgexport(fig,['imgs_parallel/9-25-meanWithDash-' r_name '.eps'])
