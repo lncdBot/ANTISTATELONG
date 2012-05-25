@@ -22719,6 +22719,7 @@ ANTISTATELONG/ROIs/Clust_mask.nii
 ANTISTATELONG/ROIs/createSpheresOneBigFile.bash
 ANTISTATELONG/ROIs/createSpheresTest.bash
 ANTISTATELONG/ROIs/Data/.DS_Store
+ANTISTATELONG/ROIs/Data/.Rapp.history
 ANTISTATELONG/ROIs/Data/.RData
 ANTISTATELONG/ROIs/Data/.Rhistory
 ANTISTATELONG/ROIs/Data/AS.lat.corr.AVG.pdf
@@ -23391,6 +23392,7 @@ ANTISTATELONG/ROIs/Data/dani_scripts/DaniAdultLevels/table_scripts020812.R
 ANTISTATELONG/ROIs/Data/dani_scripts/Data_20120505.RData
 ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/heatmap-age.png
 ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/heatmap-aspErr.png
+ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/heatmap.png
 ANTISTATELONG/ROIs/Data/dani_scripts/heatmapout/heatmap_SAME.png
 ANTISTATELONG/ROIs/Data/dani_scripts/linked312_20120504_copy.txt
 ANTISTATELONG/ROIs/Data/dani_scripts/linked9to26_20120504_copy.txt
