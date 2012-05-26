@@ -23708,8 +23708,6 @@ ANTISTATELONG/test
 ANTISTATELONG/test.png
 ANTISTATELONG/test.txt
 ANTISTATELONG/testtestsets
-ANTISTATELONG/VoxelwiseHLM/.3-sortB1Sign.bash.swp
-ANTISTATELONG/VoxelwiseHLM/.autoafni.src.bash.swp
 ANTISTATELONG/VoxelwiseHLM/.DS_Store
 ANTISTATELONG/VoxelwiseHLM/.RData
 ANTISTATELONG/VoxelwiseHLM/.Rhistory
