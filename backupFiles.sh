@@ -35,7 +35,8 @@ listfile="$root/backupfilesList.txt"
    # primarly analysis dirs 
 
    #echo -e "\n\n\n\n\n\n\n\n\Analysis\n\n\n\n\n\n"
-   find $root -type f | egrep -v '.git|FirstYear/|AfterExclusions/|/Excluded|/LtThree|mprage/|run[0-9]/|~$'
+   # 2012/06/04: not backing up CorrectAfterError analysis (it's huge and (yet to be) used)
+   find $root -type f | egrep -v '.git|FirstYear/|AfterExclusions/|/Excluded|/LtThree|mprage/|run[0-9]/|glm_hrf_residuals_CorrectAfterErrors_REML|glm_hrf_Stats_CorrectAfterErrors|~$'
 
    #EXCEPT In the following dirs, DO save files starting with "NOTE*" 
    #	Empty FoldersAfterExclusions
@@ -131,8 +132,8 @@ listfile="$root/backupfilesList.txt"
 # check size
 totalsize=$(awk '{print "\"/Volumes/Governator/"$0"\""}' $listfile | xargs du -kc | awk '(/total/){sum+=$1}END{print sum/1024**2}' );
 
-if [ ${totalsize%%.*} -gt 1024 ]; then
-  echo "Error: ${totalsize}G > 1024G, not allowing transfer :(" | 
+if [ ${totalsize%%.*} -gt 1224 ]; then
+  echo "Error: ${totalsize}G > 1224G, not allowing transfer :(" | 
     tee >(cat 1>&2 ) |  
     mail -s "ANTISTATELONG Backup too large" willforan@gmail.com ordazs@upmc.edu
   exit

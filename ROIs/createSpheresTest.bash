@@ -197,7 +197,7 @@ method="ns"
 
 #3dundump \
 #	-overwrite \
-#	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_dlPFC_R_Bea.nii \
+#	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_dlPFC_R_Bea_NOUSE.nii \
 #	-master ${rootdir}/mni_icbm152_t1_tal_nlin_asym_09c_brain_3mm.nii \
 #	-mask ${rootdir}/Reliability/mask.nii \
 #	-dval 1 \
@@ -255,6 +255,7 @@ method="ns"
 #	-orient LPI \
 #	<(echo -e "-46.5	10.5	24	1")	
 
+# not in suma display
 #3dundump \
 #	-overwrite \
 #	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_V1_bilat.nii \
@@ -291,6 +292,7 @@ method="ns"
 #	-orient LPI \
 #	<(echo -e "-8	-74	6	1")
 	
+# not suma
 #3dundump \
 #	-overwrite \
 #	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_insula_R.nii \
@@ -303,6 +305,7 @@ method="ns"
 #	-orient LPI \
 #	<(echo -e "40	10	2	1")
 	
+# not suma
 #3dundump \
 #	-overwrite \
 #	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_insula_L.nii \
@@ -327,6 +330,7 @@ method="ns"
 #	-orient LPI \
 #	<(echo -e "18	-58	-30	1")
 
+# not suma
 #3dundump \
 #	-overwrite \
 #	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_cerebellum_R.nii \
@@ -339,6 +343,7 @@ method="ns"
 #	-orient LPI \
 #	<(echo -e "24	-58	-28	1")
 
+# not suma
 #3dundump \
 #	-overwrite \
 #	-prefix ${rootdir}/ROIs/ROImask_sphere_${method}_cerebellum_L.nii \
