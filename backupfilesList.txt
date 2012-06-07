@@ -27720,8 +27720,6 @@ ANTISTATELONG/ROIHLM/imgs_parallel/vlPFC_L_invageC.png
 ANTISTATELONG/ROIHLM/plotData.m
 ANTISTATELONG/ROIHLM/plotParallel.m
 ANTISTATELONG/ROIHLM/prepareImgs.bash
-ANTISTATELONG/ROIs/.applySpheres.bash.swp
-ANTISTATELONG/ROIs/.applySpheres_corrAfterErrorCorr.bash.swp
 ANTISTATELONG/ROIs/.DS_Store
 ANTISTATELONG/ROIs/2012_04_03_applySpheres_VGScorr.txt
 ANTISTATELONG/ROIs/acc_ri_z_FDR_032112_4393 (1).nii.gz
@@ -28713,7 +28711,6 @@ ANTISTATELONG/ROIs/ROImask_sphere_ns_vlPFC_L_old.nii
 ANTISTATELONG/ROIs/ROImask_sphere_ns_vlPFC_R.nii
 ANTISTATELONG/ROIs/ROImask_sphere_ns_vlPFC_R_old.nii
 ANTISTATELONG/ROIs/splitClusters.bash
-ANTISTATELONG/ROIs/SumaMasks/.roiSpheresForSuma.bash.swp
 ANTISTATELONG/ROIs/SumaMasks/all.nii.gz
 ANTISTATELONG/ROIs/SumaMasks/all.niml.do
 ANTISTATELONG/ROIs/SumaMasks/blue.niml.do
@@ -29649,6 +29646,7 @@ ANTISTATELONG/VoxelwiseHLM/HLMimages/threewayInteraction+tlrc.BRIK
 ANTISTATELONG/VoxelwiseHLM/HLMimages/threewayInteraction+tlrc.HEAD
 ANTISTATELONG/VoxelwiseHLM/HLMimages/VoxelwiseHLM_Results.ppt
 ANTISTATELONG/VoxelwiseHLM/HLMimages/VoxelwiseHLM_Results.pptx
+ANTISTATELONG/VoxelwiseHLM/inputData/Data302_9to26_20120504_copy.dat
 ANTISTATELONG/VoxelwiseHLM/inputData/models.csv
 ANTISTATELONG/VoxelwiseHLM/inputnii/AScorr-Coef.nii
 ANTISTATELONG/VoxelwiseHLM/inputnii/AScorr-Coef_Female.nii
