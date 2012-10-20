@@ -24,6 +24,8 @@ ANTISTATELONG/#addNewNICData.bash#
 ANTISTATELONG/#antistate_preproc#
 ANTISTATELONG/#movedirsExcluded#
 ANTISTATELONG/.DS_Store
+ANTISTATELONG/.preprocessFunctional_copy_2011_12_22.swp
+ANTISTATELONG/.preprocessMprage_copy_2011_12_22.swp
 ANTISTATELONG/.Rapp.history
 ANTISTATELONG/.RData
 ANTISTATELONG/10124/.DS_Store
@@ -27631,8 +27633,6 @@ ANTISTATELONG/Reliability/VGScorr_r_TestRetest+tlrc.BRIK
 ANTISTATELONG/Reliability/VGScorr_r_TestRetest+tlrc.HEAD
 ANTISTATELONG/Renamed_2011_06_10.txt
 ANTISTATELONG/renameFiles.bash
-ANTISTATELONG/ROIHLM/.plotData.m.swp
-ANTISTATELONG/ROIHLM/.plotParallel.m.swo
 ANTISTATELONG/ROIHLM/.plotParallel.m.swp
 ANTISTATELONG/ROIHLM/csv/ageC_insula_L.csv
 ANTISTATELONG/ROIHLM/csv/ageC_insula_R.csv
@@ -27649,6 +27649,7 @@ ANTISTATELONG/ROIHLM/csv/invageC_preSMA.csv
 ANTISTATELONG/ROIHLM/csv/invageC_preSMA_Model6.csv
 ANTISTATELONG/ROIHLM/csv/invageC_vlPFC_R.csv
 ANTISTATELONG/ROIHLM/csv/invageC_vlPFC_R_Model6.csv
+ANTISTATELONG/ROIHLM/csv_parallel/20121018_Vlatcorr_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/20121018_vlPFC_L_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/Alatcorr_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/ASpErr_invageC.csv
@@ -27659,13 +27660,18 @@ ANTISTATELONG/ROIHLM/csv_parallel/dlPFC_R_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/FEF_L_ageCsq.csv
 ANTISTATELONG/ROIHLM/csv_parallel/Vlatcorr_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/vlPFC_L_invageC.csv
+ANTISTATELONG/ROIHLM/img_R20121018/ASERRORCHECK-AS_Errors_Ratio.png
+ANTISTATELONG/ROIHLM/img_R20121018/supfig1-AS_Correct_Lateancy.png
+ANTISTATELONG/ROIHLM/img_R20121018/supfig1-AS_Error_Ratio.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig3-Left_PPC.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig3-Left_putamen.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig3-Right_putamen.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig3-SEF.png
+ANTISTATELONG/ROIHLM/img_R20121018/supfig3.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig5-Left_dlPFC.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig5-Left_vlPFC.png
 ANTISTATELONG/ROIHLM/img_R20121018/supfig5-Right_dlPFC.png
+ANTISTATELONG/ROIHLM/img_R20121018/supfig5.png
 ANTISTATELONG/ROIHLM/imgs/9-25-age_putamen_L-matlab.eps
 ANTISTATELONG/ROIHLM/imgs/9-25-age_putamen_L-matlab.png
 ANTISTATELONG/ROIHLM/imgs/9-25-ageC_insula_L-matlab.eps
@@ -27734,7 +27740,7 @@ ANTISTATELONG/ROIHLM/plotData.m
 ANTISTATELONG/ROIHLM/plotData.R
 ANTISTATELONG/ROIHLM/plotParallel.m
 ANTISTATELONG/ROIHLM/prepareImgs.bash
-ANTISTATELONG/ROIHLM/supfig3+5.zip
+ANTISTATELONG/ROIHLM/supfig1+3+5.zip
 ANTISTATELONG/ROIs/.DS_Store
 ANTISTATELONG/ROIs/2012_04_03_applySpheres_VGScorr.txt
 ANTISTATELONG/ROIs/acc_ri_z_FDR_032112_4393 (1).nii.gz
