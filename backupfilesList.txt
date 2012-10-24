@@ -27632,7 +27632,6 @@ ANTISTATELONG/Reliability/VGScorr_r_TestRetest+tlrc.HEAD
 ANTISTATELONG/Renamed_2011_06_10.txt
 ANTISTATELONG/renameFiles.bash
 ANTISTATELONG/ROIHLM/#fig6.R#
-ANTISTATELONG/ROIHLM/.plotData.R.swp
 ANTISTATELONG/ROIHLM/csv/ageC_insula_L.csv
 ANTISTATELONG/ROIHLM/csv/ageC_insula_R.csv
 ANTISTATELONG/ROIHLM/csv/ageC_PPC_L.csv
@@ -27660,7 +27659,14 @@ ANTISTATELONG/ROIHLM/csv_parallel/FEF_L_ageCsq.csv
 ANTISTATELONG/ROIHLM/csv_parallel/Vlatcorr_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/vlPFC_L_invageC.csv
 ANTISTATELONG/ROIHLM/fig6/.fig6.R.swp
-ANTISTATELONG/ROIHLM/fig6/.raw.csv.swp
+ANTISTATELONG/ROIHLM/fig6/fig6-all-connected.png
+ANTISTATELONG/ROIHLM/fig6/fig6-all.png
+ANTISTATELONG/ROIHLM/fig6/fig6-line-color.png
+ANTISTATELONG/ROIHLM/fig6/fig6-line-greycolor.png
+ANTISTATELONG/ROIHLM/fig6/fig6-line-nocolor.png
+ANTISTATELONG/ROIHLM/fig6/fig6-noline-color.png
+ANTISTATELONG/ROIHLM/fig6/fig6-noline-greycolor.png
+ANTISTATELONG/ROIHLM/fig6/fig6-noline-nocolor.png
 ANTISTATELONG/ROIHLM/fig6/fig6.png
 ANTISTATELONG/ROIHLM/fig6/fig6.R
 ANTISTATELONG/ROIHLM/fig6/raw.csv
