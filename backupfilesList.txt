@@ -27658,7 +27658,8 @@ ANTISTATELONG/ROIHLM/csv_parallel/dlPFC_R_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/FEF_L_ageCsq.csv
 ANTISTATELONG/ROIHLM/csv_parallel/Vlatcorr_invageC.csv
 ANTISTATELONG/ROIHLM/csv_parallel/vlPFC_L_invageC.csv
-ANTISTATELONG/ROIHLM/fig6/.fig6.R.swp
+ANTISTATELONG/ROIHLM/fig6/.RData
+ANTISTATELONG/ROIHLM/fig6/.Rhistory
 ANTISTATELONG/ROIHLM/fig6/fig6-all-connected.png
 ANTISTATELONG/ROIHLM/fig6/fig6-all.png
 ANTISTATELONG/ROIHLM/fig6/fig6-line-color.png
