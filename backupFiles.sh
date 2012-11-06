@@ -137,16 +137,21 @@ if [ ${totalsize%%.*} -gt 1224 ]; then
     tee >(cat 1>&2 ) |  
     mail -s "ANTISTATELONG Backup too large" willforan@gmail.com ordazs@upmc.edu
   exit
-else
- echo "starting rsync for Governator: ${totalsize}Gb total on Luna1"
 fi
 
 
-# update recorded log
 cd $root
-git add $listfile 
-git commit -m "$(date +%F) auto up ($totalsize GB)"
+# update recorded log, but only if it's changed
+if ! git diff --exit-code ; then
 
+  # new files to be backed up
+  ! git diff --exit-code $listfile && git add $listfile && git commit -m "$(date +%F) auto up ($totalsize GB)"
+  
+  # report uncommited changes (and indent them)
+  #git diff --name-only |sed 's/^/	/'
+  # already given by output of git diff
+fi
+
+echo "starting rsync for Governator: ${totalsize}Gb total on Luna1"
 # transfer!
 rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Serena/Backup/
-
