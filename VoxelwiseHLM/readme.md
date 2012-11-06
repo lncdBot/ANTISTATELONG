@@ -9,6 +9,9 @@
    * should copy inputnii to gromit and run there
    * creates Rdata files in Rdata/ (should copy back to arnold)
 
+2.5 movie
+  * ./movieHLM_everyone.R -t -n inputnii/AScorr-Coef.nii -d inputData/Data302_9to26_20120504.dat -p Rdata/Corr_everyone_8_26.RData
+
 3. runVoxelwiseHLM_tonifti.R  
    * e.g. Rscript runVoxelwiseHLM_tonifti.R Rdata/AScorr-PAR-lmr.RData
    * create output head/brick in HLMimages/

@@ -22,7 +22,7 @@
 
 suppressPackageStartupMessages(library(optparse))
 
-############## get NiFTI from commandlike
+############## get NiFTI from commandline
 option_list <- list( 
                 make_option(c("-n", "--nifti"), 
                            type="character", default="",
