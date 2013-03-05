@@ -28661,6 +28661,12 @@ ANTISTATELONG/ROIs/Data/SubjData.xls
 ANTISTATELONG/ROIs/Data/SubjData_NOUSE.xlsx
 ANTISTATELONG/ROIs/Data/Testing.R
 ANTISTATELONG/ROIs/Data/VGS.lat.corr.AVG.pdf
+ANTISTATELONG/ROIs/ExecutiveControl.nii.gz
+ANTISTATELONG/ROIs/figure/.mkMasks.bash.swp
+ANTISTATELONG/ROIs/figure/ErrorMonitoring.nii.gz
+ANTISTATELONG/ROIs/figure/ExecutiveControl.nii.gz
+ANTISTATELONG/ROIs/figure/mkMasks.bash
+ANTISTATELONG/ROIs/figure/MotorResponseControl.nii.gz
 ANTISTATELONG/ROIs/glm_hrf_Stats_REML.nii.gz
 ANTISTATELONG/ROIs/InsulaMask_mask.nii
 ANTISTATELONG/ROIs/IPS_mask.nii
