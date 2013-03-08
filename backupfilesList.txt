@@ -27279,6 +27279,7 @@ ANTISTATELONG/figure/mainEffectOfTime/img/ASerrorCorr-2-sag.png
 ANTISTATELONG/figure/mainEffectOfTime/img/ASerrorCorr-3-cor.png
 ANTISTATELONG/figure/mainEffectOfTime/img/ASerrorCorr-combined.png
 ANTISTATELONG/figure/mainEffectOfTime/mkMainEffectsOfTimeFigure.bash
+ANTISTATELONG/figure/mainEffectOfTime/mni_icbm152_t1_tal_nlin_asym_09c_brain_2mm.nii
 ANTISTATELONG/filename
 ANTISTATELONG/filesToBackup.txt
 ANTISTATELONG/findNumberFiles
