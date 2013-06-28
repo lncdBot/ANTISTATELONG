@@ -30074,6 +30074,7 @@ ANTISTATELONG/VWHLM_20130531/vw_output/errorCorr-2013-05-31.log
 ANTISTATELONG/VWHLM_20130531/vw_output/errorCorr-2013-06-03.log
 ANTISTATELONG/VWHLM_20130531/vw_output/errorCorr-vw.Rdata
 ANTISTATELONG/VWHLM_20130531/vw_output/mni_icbm152_t1_tal_nlin_asym_09c_brain_2mm.nii
+ANTISTATELONG/VWHLM_20130531/vw_output/ROImask_all.nii.gz
 ANTISTATELONG/zipAndRemove.sh
 ANTISTATELONG/zipAndRemoveOut.txt
 ANTISTATELONG/10124/060803163400/mprage//mprage.nii.gz
