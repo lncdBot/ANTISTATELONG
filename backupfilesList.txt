@@ -30085,6 +30085,7 @@ ANTISTATELONG/VWHLM_20130531/AICerrCorrDiffs/sqlinmaskvssqageb1sig.png
 ANTISTATELONG/VWHLM_20130531/AICerrCorrDiffs/sqVSinv.nii.gz
 ANTISTATELONG/VWHLM_20130531/AICerrCorrDiffs/sqVSlin.nii.gz
 ANTISTATELONG/VWHLM_20130531/AICerrCorrDiffs/yellowTocyan_spectrum.png
+ANTISTATELONG/VWHLM_20130531/clustered/Clust_table.1D
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MinvAge-b0-mask.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MinvAge-b0.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MinvAge-b1-mask.nii.gz
