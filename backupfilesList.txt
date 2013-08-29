@@ -30102,10 +30102,6 @@ ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MsqAge-b0-mask.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MsqAge-b0.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MsqAge-b1-mask.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/corr-vw-MsqAge-b1.nii.gz
-ANTISTATELONG/VWHLM_20130531/clustered/Corr_invageb1_CoMass_Clust3_RIFG.tif
-ANTISTATELONG/VWHLM_20130531/clustered/Corr_invageb1_CoMass_Clust6_RMFG.tif
-ANTISTATELONG/VWHLM_20130531/clustered/Corr_invageb1_Peak_Clust3_RIFG.tif
-ANTISTATELONG/VWHLM_20130531/clustered/Corr_invageb1_Peak_Clust6RMiddleFG.tif
 ANTISTATELONG/VWHLM_20130531/clustered/errorCorr-vw-MinvAge-b0-mask.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/errorCorr-vw-MinvAge-b0.nii.gz
 ANTISTATELONG/VWHLM_20130531/clustered/errorCorr-vw-MinvAge-b1-mask.nii.gz
