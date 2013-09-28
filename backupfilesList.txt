@@ -24,6 +24,7 @@ ANTISTATELONG/ROIs/Data/dani_scripts/NOTE_forDani.txt
 ANTISTATELONG/#addNewNICData.bash#
 ANTISTATELONG/#antistate_preproc#
 ANTISTATELONG/#movedirsExcluded#
+ANTISTATELONG/.ageAtScanPerSubj.R.swp
 ANTISTATELONG/.DS_Store
 ANTISTATELONG/.Rapp.history
 ANTISTATELONG/.RData
@@ -27190,6 +27191,7 @@ ANTISTATELONG/addNewNICData.bash
 ANTISTATELONG/ageAtScanPerSubj.pdf
 ANTISTATELONG/ageAtScanPerSubj.png
 ANTISTATELONG/ageAtScanPerSubj.R
+ANTISTATELONG/ageAtScanPerSubj.tiff
 ANTISTATELONG/AgeGrpAnalyses/.3dMEMA.dbg.AFNI.args
 ANTISTATELONG/AgeGrpAnalyses/.DS_Store
 ANTISTATELONG/AgeGrpAnalyses/10170_06_glm_hrf_Stats_REML.nii.gz
