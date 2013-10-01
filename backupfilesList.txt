@@ -24,7 +24,6 @@ ANTISTATELONG/ROIs/Data/dani_scripts/NOTE_forDani.txt
 ANTISTATELONG/#addNewNICData.bash#
 ANTISTATELONG/#antistate_preproc#
 ANTISTATELONG/#movedirsExcluded#
-ANTISTATELONG/.ageAtScanPerSubj.R.swp
 ANTISTATELONG/.DS_Store
 ANTISTATELONG/.Rapp.history
 ANTISTATELONG/.RData
