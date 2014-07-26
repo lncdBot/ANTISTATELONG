@@ -29005,7 +29005,6 @@ ANTISTATELONG/SarahScripts/deleteFiles.bash
 ANTISTATELONG/SarahScripts/loops
 ANTISTATELONG/SarahScripts/searchFiles.bash
 ANTISTATELONG/SarahsPractice/rename
-ANTISTATELONG/stimtimes/.StimTimesAS.m.swp
 ANTISTATELONG/stimtimes/.StimTimesAS_test.m.swp
 ANTISTATELONG/stimtimes/check.sh
 ANTISTATELONG/stimtimes/readme
