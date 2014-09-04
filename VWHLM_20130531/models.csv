@@ -1,0 +1,12 @@
+name,numVar,numBPT,mform,rform
+null,1,1,Beta ~ 1,~1 | LunaID
+linAge,2,2,Beta ~ ageC,~ ageC | LunaID
+linAgeSex,2,2,Beta ~ ageC + sex55 + sex55:ageC,~ ageC | LunaID
+sqAge,2,3,Beta ~ ageC + ageCsq,~ ageCsq | LunaID
+sqAgeSex,3,4,Beta ~ ageC + ageCsq + sex55 + sex55:ageCsq,~ ageCsq | LunaID
+invAge,2,2,Beta ~ invageC,~ invageC | LunaID
+invAgeSex,2,4,Beta ~ invageC + sex55 + sex55:invageC,~ invageC | LunaID
+invAgeSexIQ,2,6,Beta ~ invageC + sex55 + invageC:sex55 + IQC + invageC:IQC,~ invageC | LunaID
+invAgeSexIQall,2,7,Beta ~ invageC + sex55 + invageC:sex55 + IQC + invageC:IQC + sex55:invageC:IQC,~ invageC | LunaID
+invAgeSlopeNull,2,4,Beta ~ invageC + sex55 + sex55:invageC,~ invageC | LunaID
+invAgeNoRand,1,2,Beta ~ invageC,
