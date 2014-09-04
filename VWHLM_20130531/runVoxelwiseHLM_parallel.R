@@ -276,6 +276,12 @@ LmerOutputPerVoxel <- foreach(vox=iterationRange, .combine='rbind') %dopar% {  #
        # get the formulas assocated with it (orig from models.csv
        mform <- as.formula(as.character(modelEqs[mName, "mform"]))
        
+       # Run model and get summary, when there is not rform, use gls instead of lme
+       #
+       #  pulls from mform and rform columns in model.csv.  
+       #    * mform indicates model equation 
+       #    * rform indicates random effect
+       
        if(as.character(modelEqs[mName,"rform"])==""){
           mSumm    <- summary(gls( mform, data=locDemInfo)) #use gen least sq. without random
           btp.idxs <- list( list("p",4), list("t", 3), list("b", 1) )
