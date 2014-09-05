@@ -2,7 +2,8 @@
 
 ## story 2014-09-05 
  1. copied `../VWHLM_20130531/`
- 1. `AntistateSES_clearVarNames_abbForWill.csv` combined with demographics using `00-mergeData.R`
+ 1. `AntistateSES_clearVarNames_abbForWill.csv` combined with `Data302_9to26_20120504_copy.dat` using `00-mergeData.R` to make `vw_input/SES_Demo.dat`
+ 1. edit and run `01-concatWithData.bash` to make `vw_input/demographic_hasNii.dat`
  1. edit `models.csv` for SES
  1. edit `runVoxelwiseHLM_parallel.R`
  1. edit and run `01-vw_hlm.bash` 

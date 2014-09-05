@@ -48,7 +48,7 @@ option_list <- list(
                            action="store_true", default=FALSE),
                 make_option(c("-u", "--cpus"), 
                            help="number of cpus to use [default %default]",
-                           type="integer", default=26)
+                           type="integer", default=16)
                )
 
 opt <- parse_args(OptionParser(option_list=option_list))
@@ -148,11 +148,11 @@ Demographics         <- read.table(opt$demo,sep="\t",header=TRUE)
 
 ## remove dA10se3sd == NA if using ASerror 
 # or ASerrMinAScorr
-idxs <- 0
+NAidxs <- c()
 if(grepl("err", niifile, ignore.case=TRUE)) {
    NAidxs <- which(is.na(Demographics$dA10er3sd))
    if(length(NAidxs)>0){
-     print(sprintf('removing %d dA1se3sd == NA indxs',length(idxs)) )
+     print(sprintf('removing %d dA1se3sd == NA indxs',length(NAidxs)) )
      Demographics <- Demographics[!is.na(Demographics$dA10er3sd),]
    }else{
     print(sprintf(
