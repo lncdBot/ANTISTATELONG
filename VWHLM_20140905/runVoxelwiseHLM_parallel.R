@@ -25,6 +25,9 @@ suppressPackageStartupMessages(library(optparse))
 
 ############## get NiFTI from commandline
 option_list <- list( 
+                make_option(c("-s", "--sex"), 
+                           type="character", default="",
+                           help="keep only one sexID in model"),
                 make_option(c("-n", "--nifti"), 
                            type="character", default="",
                            help="nifti file containing betas, must match demographic in dimension [required]"),
@@ -140,11 +143,14 @@ NumVisits      <- DataBeta$dim[4]                     # This would be 302
 
 #### Demographic info
 
+
+
 #/Volumes/Governator/ANTISTATELONG/VoxelwiseHLM/listAge.bash --> listage.txt
 # 10124	060803163400	12.97741273100616	1
 #Demographics        <- read.table("listage.Err.txt")
 #names(Demographics) <- c("LunaID", "bircID", "age", "sex")    #Will recoded from sex=1,2.  M = 1, F = 0
 Demographics         <- read.table(opt$demo,sep="\t",header=TRUE)
+
 
 ## remove dA10se3sd == NA if using ASerror 
 # or ASerrMinAScorr
@@ -172,6 +178,19 @@ DataBeta <- DataBeta[,,,Demographics$ID]
 # NOTE: set NA IQs to the mean
 Demographics$IQ[c(which(is.na(Demographics$IQ)))] <- 113.48 
 Demographics$IQC <- Demographics$IQ - 113.48 
+
+
+######### REMOVE male or female
+whichsexid<-opt$sex;
+if(whichsexid!=""){
+   keep <- which(Demographics$SexID==whichsexid)
+   cat('keeping all sex of ',whichsexid, ' (', length(keep),'/',NumVisits,')\n')
+   Demographics <- Demographics[keep,];
+   DataBeta <- DataBeta[,,,keep]
+   RdataName <- paste0(RdataName,'.sexid',whichsexid)
+}
+
+
 
 
 ################ Generate data frame ("DemogMRI") that's 302 rows long ############################
