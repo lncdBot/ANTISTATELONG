@@ -36,7 +36,7 @@ getinfo <- function(ses,dmg,mrg){
 
 ###############
 a   <-read.csv('vw_input/AntistateSES_clearVarNames_abbForWill.csv',header=T)
-ses <- a[,c('LunaID','VisitID','CommunitySEPz7mean','Zlevel_eduf','Zlevel_occf')]
+ses <- a[,c('LunaID','VisitID','CommunitySEPz7mean','level_eduf','level_occf', 'Zlevel_eduf','Zlevel_occf')]
 dmg <-read.table('vw_input/Data302_9to26_20120504_copy.dat',header=T,sep="\t")
 mrg <-merge(dmg,ses,by='LunaID')
 

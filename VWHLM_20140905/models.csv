@@ -1,3 +1,4 @@
 name,numVar,numBPT,mform,rform
 null,1,1,Beta ~ 1,~1 | LunaID
-SES,2,8,Beta ~  invageC + CommunitySEPz7mean + Zlevel_eduf + Zlevel_occf + invageC:CommunitySEPz7mean + invageC:Zlevel_eduf + invageC:Zlevel_occf,~ invageC | LunaID
+SES_edu,2,8,Beta ~  invageC + CommunitySEPz7mean + level_edufC + level_occfC + invageC:CommunitySEPz7mean + invageC:level_edufC + invageC:level_occfC,~ invageC | LunaID
+SES,2,4,Beta ~  invageC + CommunitySEPz7mean + invageC:CommunitySEPz7mean,~ invageC | LunaID

@@ -19,7 +19,7 @@ while read LunaID BircID BIRCIDdb Visit junk; do
  glmhrfnii=$glmhrfniiroot/$LunaID/$BIRCIDdb/$glmhrfniisuffix
  [ ! -f $glmhrfnii ] && echo "WARNING: no $glmhrfniiroot/$LunaID/$BIRCIDdb/$glmhrfniisuffix ($Visit,$BircID)" && continue
 
- echo -e "$BircID\t$LunaID\t$BIRCIDdb\t$Visit\t$junk" >> $newdemog
+ echo -e "$LunaID\t$BircID\t$BIRCIDdb\t$Visit\t$junk" >> $newdemog
  toTcat="$toTcat $glmhrfnii "
 
 done < $origdemog
@@ -29,7 +29,8 @@ for sactype in corr errorCorr; do
  3dTcat -overwrite -prefix $(dirname $newdemog)/$sactype-Coef.nii      $(echo $toTcat | sed "s/.nii.gz/.nii.gz[AS$sactype#0_Coef]/g")
 
  # check all went well
- diff <( cut -f2,3 $newdemog|perl -lne 's/\W+/ /g; print if $.>1' ) \
-      <( 3dinfo $(dirname $newdemog)/$sactype-Coef.nii 2>&1 |perl -lne 'print "$1 $2" while(m:(\d{5})/(\d{10,})/:g)')  
+ diff <( cut -f1,2 $newdemog|perl -lne 's/\W+/ /g; print if $.>1' ) \
+      <( 3dinfo $(dirname $newdemog)/$sactype-Coef.nii 2>&1 |perl -lne 'print "$1 ",sprintf("%d",$2) while(m:(\d{5})/(\d{10,})/:g)')  
+
 done
 

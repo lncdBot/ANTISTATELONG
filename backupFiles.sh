@@ -8,7 +8,7 @@
 #File: FilesToBackup.txt
 #Dir: /Volumes/Governator/ANTISTATELONG
 #
-#Purpose: These are all the files I would like Will to backup on Serena (aka the important files I use for later analyses)
+#Purpose: These are all the files I would like Will to backup on Phillips (aka the important files I use for later analyses)
 #
 #key:
 #+ = present in each subjdir/visitdir/mprage
@@ -154,4 +154,4 @@ fi
 
 echo "starting rsync for Governator: ${totalsize}Gb total on Luna1"
 # transfer!
-rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Serena/Backup/
+rsync -av --files-from=$listfile /Volumes/Governator/ skynet:/Volumes/Phillips/Backup/

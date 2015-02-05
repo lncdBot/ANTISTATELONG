@@ -26,7 +26,7 @@ suppressPackageStartupMessages(library(optparse))
 ############## get NiFTI from commandline
 option_list <- list( 
                 make_option(c("-s", "--sex"), 
-                           type="character", default="",
+                           type="character", default="0",
                            help="keep only one sexID in model"),
                 make_option(c("-n", "--nifti"), 
                            type="character", default="",
@@ -179,15 +179,18 @@ DataBeta <- DataBeta[,,,Demographics$ID]
 Demographics$IQ[c(which(is.na(Demographics$IQ)))] <- 113.48 
 Demographics$IQC <- Demographics$IQ - 113.48 
 
+# center things
+Demographics$level_edufC = Demographics$level_eduf - 5.476190
+Demographics$level_occfC = Demographics$level_occf - 6.166667
 
 ######### REMOVE male or female
 whichsexid<-opt$sex;
-if(whichsexid!=""){
+if(whichsexid!="0"){
    keep <- which(Demographics$SexID==whichsexid)
    cat('keeping all sex of ',whichsexid, ' (', length(keep),'/',NumVisits,')\n')
    Demographics <- Demographics[keep,];
    DataBeta <- DataBeta[,,,keep]
-   RdataName <- paste0(RdataName,'.sexid',whichsexid)
+   #RdataName <- paste0(RdataName,'.sexid',whichsexid)
 }
 
 
